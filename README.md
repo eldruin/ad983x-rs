@@ -1,4 +1,4 @@
-# Rust AD9833/AD9837 Low-Power Programmable Waveform Generator / Direct Digital Synthesizer (DDS)Driver
+# Rust AD9833/AD9837 Low-Power Programmable Waveform Generator / Direct Digital Synthesizer (DDS) Driver
 
 <!-- TODO
 [![crates.io](https://img.shields.io/crates/v/ad983x.svg)](https://crates.io/crates/ad983x)
