@@ -59,3 +59,20 @@ pub struct SpiInterface<SPI, CS> {
 pub struct Ad983x<DI> {
     iface: DI,
 }
+
+impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
+    /// Create a new instance of an AD9833 device
+    pub fn new_ad9833(spi: SPI, chip_select: CS) -> Self {
+        Ad983x {
+            iface: SpiInterface {
+                spi,
+                cs: chip_select,
+            },
+        }
+    }
+
+    /// Destroy driver instance, return SPI bus instance and CS output pin.
+    pub fn destroy(self) -> (SPI, CS) {
+        (self.iface.spi, self.iface.cs)
+    }
+}
