@@ -1,5 +1,6 @@
 //! This is a platform agnostic Rust driver for the AD9833 and AD9837 low-power
-//! programmable waveform generators using the [`embedded-hal`] traits.
+//! programmable waveform generators / direct digital synthesizers (DDS)
+//! using the [`embedded-hal`] traits.
 //!
 //! [`embedded-hal`]: https://github.com/rust-embedded/embedded-hal
 //!
