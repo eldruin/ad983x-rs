@@ -30,3 +30,32 @@
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
+extern crate embedded_hal as hal;
+use hal::spi::{Mode, Phase, Polarity};
+
+/// All possible errors in this crate
+#[derive(Debug)]
+pub enum Error<E> {
+    /// SPI communication error
+    Spi(E),
+}
+
+/// SPI mode (CPOL = 1, CPHA = 0)
+pub const MODE: Mode = Mode {
+    phase: Phase::CaptureOnFirstTransition,
+    polarity: Polarity::IdleHigh,
+};
+
+/// SPI interface
+#[doc(hidden)]
+#[derive(Debug, Default)]
+pub struct SpiInterface<SPI, CS> {
+    pub(crate) spi: SPI,
+    pub(crate) cs: CS,
+}
+
+/// AD983x direct digital synthesizer
+#[derive(Debug, Default)]
+pub struct Ad983x<DI> {
+    iface: DI,
+}
