@@ -21,9 +21,9 @@ Datasheets:
 - [AD9833](https://www.analog.com/media/en/technical-documentation/data-sheets/ad9833.PDF)
 - [AD9837](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9837.PDF)
 
-<!-- Application Note:
-TODO
--->
+Application Note:
+- [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)
+
 <!-- ## Usage
 
 To use this driver, import this crate and an `embedded_hal` implementation,

@@ -23,6 +23,9 @@
 //! - [AD9833](https://www.analog.com/media/en/technical-documentation/data-sheets/ad9833.PDF)
 //! - [AD9837](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9837.PDF)
 //!
+//! Application Note:
+//! - [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)
+//!
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
