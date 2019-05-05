@@ -35,6 +35,7 @@ use hal::spi::{Mode, Phase, Polarity};
 
 struct BitFlags;
 impl BitFlags {
+    const B28: u16 = 1 << 13;
     const RESET: u16 = 1 << 8;
 }
 /// All possible errors in this crate
@@ -42,6 +43,17 @@ impl BitFlags {
 pub enum Error<E> {
     /// SPI communication error
     Spi(E),
+    /// Invalid argument provided
+    InvalidArgument,
+}
+
+/// Frequency registers
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum FrequencyRegister {
+    /// Frequency register 0
+    F0,
+    /// Frequency register 1
+    F1,
 }
 
 /// SPI mode (CPOL = 1, CPHA = 0)
@@ -58,7 +70,7 @@ pub struct SpiInterface<SPI, CS> {
     pub(crate) cs: CS,
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 struct Config {
     bits: u16,
 }
@@ -129,13 +141,42 @@ where
     }
 
     fn write_control(&mut self, control: Config) -> Result<(), Error<E>> {
-        self.iface.cs.set_low();
-
-        let payload = [control.bits & 0b0011_1111_1111_1111];
-        let result = self.iface.spi.write(&payload).map_err(Error::Spi);
-
-        self.iface.cs.set_high();
+        let payload = control.bits & 0b0011_1111_1111_1111;
+        self.write(payload)?;
         self.control = control;
+        Ok(())
+    }
+
+    fn write(&mut self, payload: u16) -> Result<(), Error<E>> {
+        self.iface.cs.set_low();
+        let result = self.iface.spi.write(&[payload]).map_err(Error::Spi);
+        self.iface.cs.set_high();
         result
+    }
+
+    /// Set the frequency as a 28-bit word
+    ///
+    /// This will change the mode to 28-bit if it is not used.
+    /// Returns `Error::InvalidArgument` if providing a value that does not fit in 28 bits.
+    pub fn set_frequency(
+        &mut self,
+        register: FrequencyRegister,
+        value: u32,
+    ) -> Result<(), Error<E>> {
+        if value >= (1 << 28) {
+            return Err(Error::InvalidArgument);
+        }
+        let control = self.control.with_high(BitFlags::B28);
+        if control != self.control {
+            self.write_control(control)?;
+        }
+        let lsb = value & ((1 << 14) - 1);
+        let msb = value >> 14;
+        let reg = match register {
+            FrequencyRegister::F0 => 1 << 14,
+            FrequencyRegister::F1 => 1 << 15,
+        };
+        self.write(reg | lsb as u16)?;
+        self.write(reg | msb as u16)
     }
 }

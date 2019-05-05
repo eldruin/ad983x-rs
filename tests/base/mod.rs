@@ -3,7 +3,10 @@ use hal::spi::{Mock as SpiMock, Transaction as SpiTrans};
 
 pub struct BitFlags;
 impl BitFlags {
+    pub const B28: u16 = 1 << 13;
     pub const RESET: u16 = 1 << 8;
+    pub const FREQ0: u16 = 1 << 14;
+    pub const FREQ1: u16 = 1 << 15;
 }
 
 pub struct DummyOutputPin;
