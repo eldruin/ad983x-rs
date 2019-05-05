@@ -39,7 +39,7 @@ TODO
 
 ## Status
 
-- [ ] Compatible with AD9833
+- [X] Compatible with AD9833
 - [ ] Compatible with AD9837
 
 ## Support
