@@ -23,15 +23,16 @@ Datasheets:
 Application Note:
 - [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)
 
-<!-- ## Usage
+## Usage
 
 To use this driver, import this crate and an `embedded_hal` implementation,
 then instantiate the appropriate device.
 
-Please find additional examples using hardware in this repository: [driver-examples]
+I wrote an example MIDI player that plays Beethoven's ninth symphony in hardware :). See: [driver-examples].
 
 [driver-examples]: https://github.com/eldruin/driver-examples
 
+<!--
 ```rust
 TODO
 ```
