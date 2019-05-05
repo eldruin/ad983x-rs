@@ -1,5 +1,5 @@
 extern crate ad983x;
-use ad983x::FrequencyRegister;
+use ad983x::FrequencyRegister as FreqReg;
 extern crate embedded_hal_mock as hal;
 use self::hal::spi::Transaction as SpiTrans;
 
@@ -41,7 +41,7 @@ fn can_reset() {
 #[test]
 fn cannot_set_too_fast_frequency() {
     let mut dev = new_ad9833(&[]);
-    dev.set_frequency(FrequencyRegister::F0, 1 << 28)
+    dev.set_frequency(FreqReg::F0, 1 << 28)
         .expect_err("Should return error");
     destroy(dev);
 }
@@ -54,8 +54,7 @@ fn can_set_freq0() {
         SpiTrans::write(vec![BF::FREQ0 | 0x26, 0xAF]),
     ];
     let mut dev = new_ad9833(&transitions);
-    dev.set_frequency(FrequencyRegister::F0, 0x9AB_CDEF)
-        .unwrap();
+    dev.set_frequency(FreqReg::F0, 0x9AB_CDEF).unwrap();
     destroy(dev);
 }
 
@@ -67,7 +66,22 @@ fn can_set_freq1() {
         SpiTrans::write(vec![BF::FREQ1 | 0x26, 0xAF]),
     ];
     let mut dev = new_ad9833(&transitions);
-    dev.set_frequency(FrequencyRegister::F1, 0x9AB_CDEF)
-        .unwrap();
+    dev.set_frequency(FreqReg::F1, 0x9AB_CDEF).unwrap();
+    destroy(dev);
+}
+
+#[test]
+fn can_select_freq0() {
+    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let mut dev = new_ad9833(&transitions);
+    dev.select_frequency(FreqReg::F0).unwrap();
+    destroy(dev);
+}
+
+#[test]
+fn can_select_freq1() {
+    let transitions = [SpiTrans::write(vec![BF::FSELECT | BF::RESET, 0])];
+    let mut dev = new_ad9833(&transitions);
+    dev.select_frequency(FreqReg::F1).unwrap();
     destroy(dev);
 }

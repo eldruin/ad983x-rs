@@ -36,6 +36,7 @@ use hal::spi::{Mode, Phase, Polarity};
 struct BitFlags;
 impl BitFlags {
     const B28: u16 = 1 << 13;
+    const FSELECT: u16 = 1 << 11;
     const RESET: u16 = 1 << 8;
 }
 /// All possible errors in this crate
@@ -182,5 +183,14 @@ where
         };
         self.write(reg | lsb as u16)?;
         self.write(reg | msb as u16)
+    }
+
+    /// Select the frequency register that is used
+    pub fn select_frequency(&mut self, register: FrequencyRegister) -> Result<(), Error<E>> {
+        let control = match register {
+            FrequencyRegister::F0 => self.control.with_low(BitFlags::FSELECT),
+            FrequencyRegister::F1 => self.control.with_high(BitFlags::FSELECT),
+        };
+        self.write_control(control)
     }
 }
