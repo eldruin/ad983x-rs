@@ -33,6 +33,10 @@
 extern crate embedded_hal as hal;
 use hal::spi::{Mode, Phase, Polarity};
 
+struct BitFlags;
+impl BitFlags {
+    const RESET: u16 = 1 << 8;
+}
 /// All possible errors in this crate
 #[derive(Debug)]
 pub enum Error<E> {
@@ -54,19 +58,42 @@ pub struct SpiInterface<SPI, CS> {
     pub(crate) cs: CS,
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+struct Config {
+    bits: u16,
+}
+
+impl Config {
+    fn with_high(self, mask: u16) -> Self {
+        Config {
+            bits: self.bits | mask,
+        }
+    }
+    fn with_low(self, mask: u16) -> Self {
+        Config {
+            bits: self.bits & !mask,
+        }
+    }
+}
+
 /// AD983x direct digital synthesizer
 #[derive(Debug, Default)]
 pub struct Ad983x<DI> {
     iface: DI,
+    control: Config,
 }
 
 impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
-    /// Create a new instance of an AD9833 device
+    /// Create a new instance of an AD9833 device.
+    /// Remember to call `reset()` before using the device after power up.
     pub fn new_ad9833(spi: SPI, chip_select: CS) -> Self {
         Ad983x {
             iface: SpiInterface {
                 spi,
                 cs: chip_select,
+            },
+            control: Config {
+                bits: BitFlags::RESET,
             },
         }
     }
@@ -74,5 +101,41 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
     /// Destroy driver instance, return SPI bus instance and CS output pin.
     pub fn destroy(self) -> (SPI, CS) {
         (self.iface.spi, self.iface.cs)
+    }
+}
+
+impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>>
+where
+    SPI: hal::blocking::spi::Write<u16, Error = E>,
+    CS: hal::digital::OutputPin,
+{
+    /// Resets the internal registers and leaves the device disabled.
+    pub fn reset(&mut self) -> Result<(), Error<E>> {
+        self.disable()
+    }
+
+    /// Disable the device (enable reset)
+    ///
+    /// This resets the internal registers
+    pub fn disable(&mut self) -> Result<(), Error<E>> {
+        let control = self.control.with_high(BitFlags::RESET);
+        self.write_control(control)
+    }
+
+    /// Enable the device (disable reset)
+    pub fn enable(&mut self) -> Result<(), Error<E>> {
+        let control = self.control.with_low(BitFlags::RESET);
+        self.write_control(control)
+    }
+
+    fn write_control(&mut self, control: Config) -> Result<(), Error<E>> {
+        self.iface.cs.set_low();
+
+        let payload = [control.bits & 0b0011_1111_1111_1111];
+        let result = self.iface.spi.write(&payload).map_err(Error::Spi);
+
+        self.iface.cs.set_high();
+        self.control = control;
+        result
     }
 }
