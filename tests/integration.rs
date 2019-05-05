@@ -16,7 +16,7 @@ fn can_create_and_destroy() {
 
 #[test]
 fn can_enable() {
-    let transitions = [SpiTrans::write(vec![0])];
+    let transitions = [SpiTrans::write(vec![0, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.enable().unwrap();
     destroy(dev);
@@ -24,7 +24,7 @@ fn can_enable() {
 
 #[test]
 fn can_disable() {
-    let transitions = [SpiTrans::write(vec![BF::RESET])];
+    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.disable().unwrap();
     destroy(dev);
@@ -32,7 +32,7 @@ fn can_disable() {
 
 #[test]
 fn can_reset() {
-    let transitions = [SpiTrans::write(vec![BF::RESET])];
+    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.reset().unwrap();
     destroy(dev);
@@ -49,9 +49,9 @@ fn cannot_set_too_fast_frequency() {
 #[test]
 fn can_set_freq0() {
     let transitions = [
-        SpiTrans::write(vec![BF::B28 | BF::RESET]),
-        SpiTrans::write(vec![BF::FREQ0 | 0xDEF]),
-        SpiTrans::write(vec![BF::FREQ0 | 0x26AF]),
+        SpiTrans::write(vec![BF::B28 | BF::RESET, 0]),
+        SpiTrans::write(vec![BF::FREQ0 | 0xD, 0xEF]),
+        SpiTrans::write(vec![BF::FREQ0 | 0x26, 0xAF]),
     ];
     let mut dev = new_ad9833(&transitions);
     dev.set_frequency(FrequencyRegister::F0, 0x9AB_CDEF)
@@ -62,9 +62,9 @@ fn can_set_freq0() {
 #[test]
 fn can_set_freq1() {
     let transitions = [
-        SpiTrans::write(vec![BF::B28 | BF::RESET]),
-        SpiTrans::write(vec![BF::FREQ1 | 0xDEF]),
-        SpiTrans::write(vec![BF::FREQ1 | 0x26AF]),
+        SpiTrans::write(vec![BF::B28 | BF::RESET, 0]),
+        SpiTrans::write(vec![BF::FREQ1 | 0xD, 0xEF]),
+        SpiTrans::write(vec![BF::FREQ1 | 0x26, 0xAF]),
     ];
     let mut dev = new_ad9833(&transitions);
     dev.set_frequency(FrequencyRegister::F1, 0x9AB_CDEF)

@@ -118,7 +118,7 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
 
 impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>>
 where
-    SPI: hal::blocking::spi::Write<u16, Error = E>,
+    SPI: hal::blocking::spi::Write<u8, Error = E>,
     CS: hal::digital::OutputPin,
 {
     /// Resets the internal registers and leaves the device disabled.
@@ -149,7 +149,11 @@ where
 
     fn write(&mut self, payload: u16) -> Result<(), Error<E>> {
         self.iface.cs.set_low();
-        let result = self.iface.spi.write(&[payload]).map_err(Error::Spi);
+        let result = self
+            .iface
+            .spi
+            .write(&[(payload >> 8) as u8, payload as u8])
+            .map_err(Error::Spi);
         self.iface.cs.set_high();
         result
     }
