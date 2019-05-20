@@ -35,6 +35,9 @@ use hal::spi::{Mode, Phase, Polarity};
 
 struct BitFlags;
 impl BitFlags {
+    const D15: u16 = 1 << 15;
+    const D14: u16 = 1 << 14;
+    const D13: u16 = 1 << 13;
     const B28: u16 = 1 << 13;
     const FSELECT: u16 = 1 << 11;
     const RESET: u16 = 1 << 8;
@@ -55,6 +58,15 @@ pub enum FrequencyRegister {
     F0,
     /// Frequency register 1
     F1,
+}
+
+/// Phase registers
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PhaseRegister {
+    /// Phase register 0
+    P0,
+    /// Phase register 1
+    P1,
 }
 
 /// SPI mode (CPOL = 1, CPHA = 0)
@@ -192,5 +204,20 @@ where
             FrequencyRegister::F1 => self.control.with_high(BitFlags::FSELECT),
         };
         self.write_control(control)
+    }
+
+    /// Set a phase register (12-bit value)
+    ///
+    /// Returns `Error::InvalidArgument` if providing a value that does not fit in 12 bits.
+    pub fn set_phase(&mut self, register: PhaseRegister, value: u16) -> Result<(), Error<E>> {
+        if value >= (1 << 12) {
+            return Err(Error::InvalidArgument);
+        }
+        let value = value | BitFlags::D14 | BitFlags::D15;
+        let value = match register {
+            PhaseRegister::P0 => value,
+            PhaseRegister::P1 => value | BitFlags::D13,
+        };
+        self.write(value)
     }
 }

@@ -3,6 +3,9 @@ use hal::spi::{Mock as SpiMock, Transaction as SpiTrans};
 
 pub struct BitFlags;
 impl BitFlags {
+    pub const D15: u8 = 1 << 7;
+    pub const D14: u8 = 1 << 6;
+    pub const D13: u8 = 1 << 5;
     pub const B28: u8 = 1 << 5;
     pub const FSELECT: u8 = 1 << 3;
     pub const RESET: u8 = 1;
