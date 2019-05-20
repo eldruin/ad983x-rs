@@ -9,6 +9,9 @@ impl BitFlags {
     pub const B28: u8 = 1 << 5;
     pub const FSELECT: u8 = 1 << 3;
     pub const PSELECT: u8 = 1 << 2;
+    pub const OPBITEN: u8 = 1 << 5;
+    pub const DIV2: u8 = 1 << 3;
+    pub const MODE: u8 = 1 << 1;
     pub const RESET: u8 = 1;
     pub const FREQ0: u8 = 1 << 6;
     pub const FREQ1: u8 = 1 << 7;

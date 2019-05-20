@@ -42,6 +42,9 @@ impl BitFlags {
     const FSELECT: u16 = 1 << 11;
     const PSELECT: u16 = 1 << 10;
     const RESET: u16 = 1 << 8;
+    const OPBITEN: u16 = 1 << 5;
+    const DIV2: u16 = 1 << 3;
+    const MODE: u16 = 1 << 1;
 }
 /// All possible errors in this crate
 #[derive(Debug)]
@@ -68,6 +71,19 @@ pub enum PhaseRegister {
     P0,
     /// Phase register 1
     P1,
+}
+
+/// Output waveform
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OutputWaveform {
+    /// Sinusoidal wave
+    Sinusoidal,
+    /// Triangle wave
+    Triangle,
+    /// Square wave with its value matching the MSB of DAC data
+    SquareMsbOfDac,
+    /// Square wave with its value matching the MSB of DAC data divided by 2
+    SquareMsbOfDacDiv2,
 }
 
 /// SPI mode (CPOL = 1, CPHA = 0)
@@ -227,6 +243,31 @@ where
         let control = match register {
             PhaseRegister::P0 => self.control.with_low(BitFlags::PSELECT),
             PhaseRegister::P1 => self.control.with_high(BitFlags::PSELECT),
+        };
+        self.write_control(control)
+    }
+
+    /// Set the output waveform
+    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), Error<E>> {
+        let control = match waveform {
+            OutputWaveform::Sinusoidal => self
+                .control
+                .with_low(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE),
+            OutputWaveform::Triangle => self
+                .control
+                .with_low(BitFlags::OPBITEN)
+                .with_high(BitFlags::MODE),
+            OutputWaveform::SquareMsbOfDac => self
+                .control
+                .with_high(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE)
+                .with_high(BitFlags::DIV2),
+            OutputWaveform::SquareMsbOfDacDiv2 => self
+                .control
+                .with_high(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE)
+                .with_low(BitFlags::DIV2),
         };
         self.write_control(control)
     }

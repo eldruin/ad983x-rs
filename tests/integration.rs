@@ -1,5 +1,5 @@
 extern crate ad983x;
-use ad983x::{FrequencyRegister as FreqReg, PhaseRegister as PhaseReg};
+use ad983x::{FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg};
 extern crate embedded_hal_mock as hal;
 use self::hal::spi::Transaction as SpiTrans;
 
@@ -126,3 +126,20 @@ fn can_select_phase1() {
     dev.select_phase(PhaseReg::P1).unwrap();
     destroy(dev);
 }
+
+macro_rules! ow_test {
+    ($name:ident, $ow:ident, $control:expr) => {
+        #[test]
+        fn $name() {
+            let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
+            let mut dev = new_ad9833(&transitions);
+            dev.set_output_waveform(OW::$ow).unwrap();
+            destroy(dev);
+        }
+    };
+}
+
+ow_test!(can_set_sinusoidal_out, Sinusoidal, 0);
+ow_test!(can_set_triangle_out, Triangle, BF::MODE);
+ow_test!(can_set_sq_msb_out, SquareMsbOfDac, BF::OPBITEN | BF::DIV2);
+ow_test!(can_set_sq_msb_div2_out, SquareMsbOfDacDiv2, BF::OPBITEN);
