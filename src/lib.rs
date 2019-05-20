@@ -190,8 +190,8 @@ where
         let lsb = value & ((1 << 14) - 1);
         let msb = value >> 14;
         let reg = match register {
-            FrequencyRegister::F0 => 1 << 14,
-            FrequencyRegister::F1 => 1 << 15,
+            FrequencyRegister::F0 => BitFlags::D14,
+            FrequencyRegister::F1 => BitFlags::D15,
         };
         self.write(reg | lsb as u16)?;
         self.write(reg | msb as u16)
