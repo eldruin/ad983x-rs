@@ -6,8 +6,6 @@ use self::hal::spi::Transaction as SpiTrans;
 mod base;
 use base::{destroy, new_ad9833, BitFlags as BF};
 
-// TODO: wait for resolution of https://github.com/dbrgn/embedded-hal-mock/issues/25
-
 #[test]
 fn can_create_and_destroy() {
     let dev = new_ad9833(&[]);
