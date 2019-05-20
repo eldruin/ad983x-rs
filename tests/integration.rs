@@ -110,3 +110,19 @@ fn can_set_phase1() {
     dev.set_phase(PhaseReg::P1, 0xABC).unwrap();
     destroy(dev);
 }
+
+#[test]
+fn can_select_phase0() {
+    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let mut dev = new_ad9833(&transitions);
+    dev.select_phase(PhaseReg::P0).unwrap();
+    destroy(dev);
+}
+
+#[test]
+fn can_select_phase1() {
+    let transitions = [SpiTrans::write(vec![BF::PSELECT | BF::RESET, 0])];
+    let mut dev = new_ad9833(&transitions);
+    dev.select_phase(PhaseReg::P1).unwrap();
+    destroy(dev);
+}

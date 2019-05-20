@@ -40,6 +40,7 @@ impl BitFlags {
     const D13: u16 = 1 << 13;
     const B28: u16 = 1 << 13;
     const FSELECT: u16 = 1 << 11;
+    const PSELECT: u16 = 1 << 10;
     const RESET: u16 = 1 << 8;
 }
 /// All possible errors in this crate
@@ -219,5 +220,14 @@ where
             PhaseRegister::P1 => value | BitFlags::D13,
         };
         self.write(value)
+    }
+
+    /// Select the phase register that is used
+    pub fn select_phase(&mut self, register: PhaseRegister) -> Result<(), Error<E>> {
+        let control = match register {
+            PhaseRegister::P0 => self.control.with_low(BitFlags::PSELECT),
+            PhaseRegister::P1 => self.control.with_high(BitFlags::PSELECT),
+        };
+        self.write_control(control)
     }
 }
