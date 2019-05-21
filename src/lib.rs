@@ -203,6 +203,17 @@ where
         result
     }
 
+    fn check_value_fits<T>(value: T, bit_count: T) -> Result<(), Error<E>>
+    where
+        T: From<u8> + PartialOrd + core::ops::Shl<Output = T>,
+    {
+        if value >= (T::from(1) << bit_count) {
+            Err(Error::InvalidArgument)
+        } else {
+            Ok(())
+        }
+    }
+
     /// Set the frequency as a 28-bit word
     ///
     /// This will change the mode to 28-bit if it is not used.
@@ -212,9 +223,7 @@ where
         register: FrequencyRegister,
         value: u32,
     ) -> Result<(), Error<E>> {
-        if value >= (1 << 28) {
-            return Err(Error::InvalidArgument);
-        }
+        Self::check_value_fits(value, 28)?;
         let control = self.control.with_high(BitFlags::B28);
         if control != self.control {
             self.write_control(control)?;
@@ -242,9 +251,7 @@ where
     ///
     /// Returns `Error::InvalidArgument` if providing a value that does not fit in 12 bits.
     pub fn set_phase(&mut self, register: PhaseRegister, value: u16) -> Result<(), Error<E>> {
-        if value >= (1 << 12) {
-            return Err(Error::InvalidArgument);
-        }
+        Self::check_value_fits(value, 12)?;
         let value = value | BitFlags::D14 | BitFlags::D15;
         let value = match register {
             PhaseRegister::P0 => value,
