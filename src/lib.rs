@@ -42,6 +42,8 @@ impl BitFlags {
     const FSELECT: u16 = 1 << 11;
     const PSELECT: u16 = 1 << 10;
     const RESET: u16 = 1 << 8;
+    const SLEEP_MCLK: u16 = 1 << 7; // SLEEP1
+    const SLEEP_DAC: u16 = 1 << 6; // SLEEP12
     const OPBITEN: u16 = 1 << 5;
     const DIV2: u16 = 1 << 3;
     const MODE: u16 = 1 << 1;
@@ -84,6 +86,19 @@ pub enum OutputWaveform {
     SquareMsbOfDac,
     /// Square wave with its value matching the MSB of DAC data divided by 2
     SquareMsbOfDacDiv2,
+}
+
+/// Powered-down device configuration
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PoweredDown {
+    /// All chip parts are enabled
+    Nothing,
+    /// Power down only the DAC
+    Dac,
+    /// Disable only the internal clock
+    InternalClock,
+    /// Power down the DAC and disable the internal clock
+    DacAndInternalClock,
 }
 
 /// SPI mode (CPOL = 1, CPHA = 0)
@@ -268,6 +283,29 @@ where
                 .with_high(BitFlags::OPBITEN)
                 .with_low(BitFlags::MODE)
                 .with_low(BitFlags::DIV2),
+        };
+        self.write_control(control)
+    }
+
+    /// Set device parts powered-down state
+    pub fn set_powered_down(&mut self, config: PoweredDown) -> Result<(), Error<E>> {
+        let control = match config {
+            PoweredDown::Nothing => self
+                .control
+                .with_low(BitFlags::SLEEP_MCLK)
+                .with_low(BitFlags::SLEEP_DAC),
+            PoweredDown::Dac => self
+                .control
+                .with_low(BitFlags::SLEEP_MCLK)
+                .with_high(BitFlags::SLEEP_DAC),
+            PoweredDown::InternalClock => self
+                .control
+                .with_high(BitFlags::SLEEP_MCLK)
+                .with_low(BitFlags::SLEEP_DAC),
+            PoweredDown::DacAndInternalClock => self
+                .control
+                .with_high(BitFlags::SLEEP_MCLK)
+                .with_high(BitFlags::SLEEP_DAC),
         };
         self.write_control(control)
     }

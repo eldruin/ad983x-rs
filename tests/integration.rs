@@ -1,5 +1,8 @@
 extern crate ad983x;
-use ad983x::{FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg};
+use ad983x::{
+    FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg,
+    PoweredDown as PD,
+};
 extern crate embedded_hal_mock as hal;
 use self::hal::spi::Transaction as SpiTrans;
 
@@ -143,3 +146,24 @@ ow_test!(can_set_sinusoidal_out, Sinusoidal, 0);
 ow_test!(can_set_triangle_out, Triangle, BF::MODE);
 ow_test!(can_set_sq_msb_out, SquareMsbOfDac, BF::OPBITEN | BF::DIV2);
 ow_test!(can_set_sq_msb_div2_out, SquareMsbOfDacDiv2, BF::OPBITEN);
+
+macro_rules! pd_test {
+    ($name:ident, $pd:ident, $control:expr) => {
+        #[test]
+        fn $name() {
+            let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
+            let mut dev = new_ad9833(&transitions);
+            dev.set_powered_down(PD::$pd).unwrap();
+            destroy(dev);
+        }
+    };
+}
+
+pd_test!(can_set_pd_nothing, Nothing, 0);
+pd_test!(can_set_pd_dac, Dac, BF::SLEEP_DAC);
+pd_test!(can_set_pd_mclk, InternalClock, BF::SLEEP_MCLK);
+pd_test!(
+    can_set_pd_dac_mclk,
+    DacAndInternalClock,
+    BF::SLEEP_MCLK | BF::SLEEP_DAC
+);
