@@ -185,6 +185,14 @@ where
         self.write_control(control)
     }
 
+    fn write_control_if_different(&mut self, control: Config) -> Result<(), Error<E>> {
+        if control != self.control {
+            self.write_control(control)
+        } else {
+            Ok(())
+        }
+    }
+
     fn write_control(&mut self, control: Config) -> Result<(), Error<E>> {
         let payload = control.bits & 0b0011_1111_1111_1111;
         self.write(payload)?;
@@ -225,9 +233,7 @@ where
     ) -> Result<(), Error<E>> {
         Self::check_value_fits(value, 28)?;
         let control = self.control.with_high(BitFlags::B28);
-        if control != self.control {
-            self.write_control(control)?;
-        }
+        self.write_control_if_different(control)?;
         let lsb = value & ((1 << 14) - 1);
         let msb = value >> 14;
         let reg = match register {
