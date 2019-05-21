@@ -39,6 +39,7 @@ impl BitFlags {
     const D14: u16 = 1 << 14;
     const D13: u16 = 1 << 13;
     const B28: u16 = 1 << 13;
+    const HLB: u16 = 1 << 12;
     const FSELECT: u16 = 1 << 11;
     const PSELECT: u16 = 1 << 10;
     const RESET: u16 = 1 << 8;
@@ -246,6 +247,41 @@ where
             FrequencyRegister::F0 => BitFlags::D14,
             FrequencyRegister::F1 => BitFlags::D15,
         }
+    }
+
+    /// Set the frequency 14-bit MSBs
+    ///
+    /// This will deactivate the 28-bit mode if it is not already the case.
+    /// Returns `Error::InvalidArgument` if providing a value that does not fit in 14 bits.
+    pub fn set_frequency_msb(
+        &mut self,
+        register: FrequencyRegister,
+        value: u16,
+    ) -> Result<(), Error<E>> {
+        Self::check_value_fits(value, 14)?;
+        let control = self
+            .control
+            .with_low(BitFlags::B28)
+            .with_high(BitFlags::HLB);
+        self.write_control_if_different(control)?;
+        let reg = Self::get_freq_register_bits(register);
+        self.write(reg | value as u16)
+    }
+
+    /// Set the frequency 14-bit LSBs
+    ///
+    /// This will deactivate the 28-bit mode if it is not already the case.
+    /// Returns `Error::InvalidArgument` if providing a value that does not fit in 14 bits.
+    pub fn set_frequency_lsb(
+        &mut self,
+        register: FrequencyRegister,
+        value: u16,
+    ) -> Result<(), Error<E>> {
+        Self::check_value_fits(value, 14)?;
+        let control = self.control.with_low(BitFlags::B28).with_low(BitFlags::HLB);
+        self.write_control_if_different(control)?;
+        let reg = Self::get_freq_register_bits(register);
+        self.write(reg | value as u16)
     }
 
     /// Select the frequency register that is used

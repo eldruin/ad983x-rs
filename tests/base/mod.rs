@@ -7,6 +7,7 @@ impl BitFlags {
     pub const D14: u8 = 1 << 6;
     pub const D13: u8 = 1 << 5;
     pub const B28: u8 = 1 << 5;
+    pub const HLB: u8 = 1 << 4;
     pub const FSELECT: u8 = 1 << 3;
     pub const PSELECT: u8 = 1 << 2;
     pub const SLEEP_MCLK: u8 = 1 << 7;

@@ -167,3 +167,38 @@ pd_test!(
     DacAndInternalClock,
     BF::SLEEP_MCLK | BF::SLEEP_DAC
 );
+
+#[test]
+fn cannot_set_wrong_freq_msb() {
+    let mut dev = new_ad9833(&[]);
+    dev.set_frequency_msb(FreqReg::F0, 1 << 14)
+        .expect_err("Should return error");
+    destroy(dev);
+}
+
+#[test]
+fn cannot_set_wrong_freq_lsb() {
+    let mut dev = new_ad9833(&[]);
+    dev.set_frequency_lsb(FreqReg::F0, 1 << 14)
+        .expect_err("Should return error");
+    destroy(dev);
+}
+
+#[test]
+fn can_set_freq_msb() {
+    let transitions = [
+        SpiTrans::write(vec![BF::HLB | BF::RESET, 0]),
+        SpiTrans::write(vec![BF::FREQ0 | 0xD, 0xEF]),
+    ];
+    let mut dev = new_ad9833(&transitions);
+    dev.set_frequency_msb(FreqReg::F0, 0xDEF).unwrap();
+    destroy(dev);
+}
+
+#[test]
+fn can_set_freq_lsb() {
+    let transitions = [SpiTrans::write(vec![BF::FREQ1 | 0xD, 0xEF])];
+    let mut dev = new_ad9833(&transitions);
+    dev.set_frequency_lsb(FreqReg::F1, 0xDEF).unwrap();
+    destroy(dev);
+}
