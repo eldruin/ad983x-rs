@@ -236,12 +236,16 @@ where
         self.write_control_if_different(control)?;
         let lsb = value & ((1 << 14) - 1);
         let msb = value >> 14;
-        let reg = match register {
-            FrequencyRegister::F0 => BitFlags::D14,
-            FrequencyRegister::F1 => BitFlags::D15,
-        };
+        let reg = Self::get_freq_register_bits(register);
         self.write(reg | lsb as u16)?;
         self.write(reg | msb as u16)
+    }
+
+    fn get_freq_register_bits(register: FrequencyRegister) -> u16 {
+        match register {
+            FrequencyRegister::F0 => BitFlags::D14,
+            FrequencyRegister::F1 => BitFlags::D15,
+        }
     }
 
     /// Select the frequency register that is used
