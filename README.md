@@ -33,6 +33,9 @@ Datasheets:
 Application Note:
 - [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)
 
+Article explaining DDS using an AD9833:
+- [All about direct digital synthesis](https://www.analog.com/en/analog-dialogue/articles/all-about-direct-digital-synthesis.html)
+
 ## Usage
 
 To use this driver, import this crate and an `embedded_hal` implementation,
