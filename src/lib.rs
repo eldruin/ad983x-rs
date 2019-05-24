@@ -46,6 +46,129 @@
 //! Application Note:
 //! - [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)
 //!
+//! ## Usage examples (see also examples folder)
+//!
+//! To use this driver, import this crate and an `embedded_hal` implementation,
+//! then instantiate the appropriate device.
+//! In the following examples an instance of the device AD9833 will be created
+//! as an example. Other devices can be created with similar methods like:
+//! `Ad983x::new_ad9837(...)`.
+//!
+//! Please find additional examples using hardware in this repository: [driver-examples].
+//!
+//! This includes an example MIDI player that plays Beethoven's ninth symphony.
+//!
+//! [driver-examples]: https://github.com/eldruin/driver-examples
+//!
+//! ### Set the frequency register 0 and enable
+//!
+//! ```no_run
+//! extern crate ad983x;
+//! extern crate linux_embedded_hal;
+//!
+//! use ad983x::{Ad983x, FrequencyRegister};
+//! use linux_embedded_hal::{Pin, Spidev};
+//!
+//! # fn main() {
+//! let spi = Spidev::open("/dev/spidev0.0").unwrap();
+//! let chip_select = Pin::new(25);
+//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! dds.reset().unwrap(); // reset is necessary before operation
+//! dds.set_frequency(FrequencyRegister::F0, 4724).unwrap();
+//! dds.enable().unwrap();
+//! // Given a 25 MHz clock, this now outputs a sine wave
+//! // with a frequency of 440 Hz, which is a standard
+//! // A4 tone.
+//!
+//! // Get SPI device and CS pin back
+//! let (_spi, _chip_select) = dds.destroy();
+//! # }
+//! ```
+//!
+//! ### Set frequency registers 0 and 1 and alternate between them
+//!
+//! With a 25 MHz clock this alternates between A4 and D5 tones.
+//!
+//! ```no_run
+//! extern crate ad983x;
+//! extern crate linux_embedded_hal;
+//!
+//! use ad983x::{Ad983x, FrequencyRegister};
+//! use linux_embedded_hal::{Pin, Spidev};
+//!
+//! # fn main() {
+//! let spi = Spidev::open("/dev/spidev0.0").unwrap();
+//! let chip_select = Pin::new(25);
+//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! dds.reset().unwrap(); // reset is necessary before operation
+//! // A4 tone for a 25 MHz clock
+//! dds.set_frequency(FrequencyRegister::F0, 4724).unwrap();
+//! // D5 tone for a 25 MHz clock
+//! dds.set_frequency(FrequencyRegister::F1, 6306).unwrap();
+//! dds.enable().unwrap();
+//! loop {
+//!     // some delay
+//!     dds.select_frequency(FrequencyRegister::F1).unwrap();
+//!     // some delay
+//!     dds.select_frequency(FrequencyRegister::F0).unwrap();
+//! }
+//! # }
+//! ```
+//!
+//! ### Set the phase register 1 and select it
+//!
+//! ```no_run
+//! extern crate ad983x;
+//! extern crate linux_embedded_hal;
+//!
+//! use ad983x::{Ad983x, PhaseRegister};
+//! use linux_embedded_hal::{Pin, Spidev};
+//!
+//! # fn main() {
+//! let spi = Spidev::open("/dev/spidev0.0").unwrap();
+//! let chip_select = Pin::new(25);
+//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! dds.reset().unwrap(); // reset is necessary before operation
+//! dds.set_phase(PhaseRegister::P1, 4724).unwrap();
+//! dds.select_phase(PhaseRegister::P1).unwrap();
+//! # }
+//! ```
+//!
+//! ### Set output waveform to be triangular
+//!
+//! ```no_run
+//! extern crate ad983x;
+//! extern crate linux_embedded_hal;
+//!
+//! use ad983x::{Ad983x, OutputWaveform};
+//! use linux_embedded_hal::{Pin, Spidev};
+//!
+//! # fn main() {
+//! let spi = Spidev::open("/dev/spidev0.0").unwrap();
+//! let chip_select = Pin::new(25);
+//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! dds.reset().unwrap(); // reset is necessary before operation
+//! dds.set_output_waveform(OutputWaveform::Triangle).unwrap();
+//! # }
+//! ```
+//!
+//! ### Power down the DAC
+//!
+//! ```no_run
+//! extern crate ad983x;
+//! extern crate linux_embedded_hal;
+//!
+//! use ad983x::{Ad983x, PoweredDown};
+//! use linux_embedded_hal::{Pin, Spidev};
+//!
+//! # fn main() {
+//! let spi = Spidev::open("/dev/spidev0.0").unwrap();
+//! let chip_select = Pin::new(25);
+//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! dds.reset().unwrap(); // reset is necessary before operation
+//! dds.set_powered_down(PoweredDown::Dac).unwrap();
+//! # }
+//! ```
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
