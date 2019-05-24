@@ -4,6 +4,25 @@
 //!
 //! [`embedded-hal`]: https://github.com/rust-embedded/embedded-hal
 //!
+//! This driver allows you to:
+//! - Enable/disable/reset the device. See [`enable()`].
+//! - Set the frequency registers. See: [`set_frequency()`].
+//! - Select the output frequency register. See: [`select_frequency()`].
+//! - Set the phase registers. See: [`set_phase()`].
+//! - Select the output phase register. See: [`select_phase()`].
+//! - Set the frequency registers MSBs/LSBs separately. See: [`set_frequency_msb()`].
+//! - Set the output waveform. See: [`set_output_waveform()`].
+//! - Power down/up device parts. See: [`set_powered_down()`].
+//!
+//! [`enable()`]: struct.Ad983x.html#method.enable
+//! [`set_frequency()`]: struct.Ad983x.html#method.set_frequency
+//! [`select_frequency()`]: struct.Ad983x.html#method.select_frequency
+//! [`set_phase()`]: struct.Ad983x.html#method.set_phase
+//! [`select_phase()`]: struct.Ad983x.html#method.select_phase
+//! [`set_frequency_msb()`]: struct.Ad983x.html#method.set_frequency_msb
+//! [`set_output_waveform()`]: struct.Ad983x.html#method.set_output_waveform
+//! [`set_powered_down()`]: struct.Ad983x.html#method.set_powered_down
+//!
 //! ## The devices
 //!
 //! The AD9833 and AD9837 are low power, programmable waveform generators

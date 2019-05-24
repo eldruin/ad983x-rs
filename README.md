@@ -10,6 +10,16 @@
 
 This is a platform agnostic Rust driver for the AD9833 and AD9837 low-power programmable waveform generators / direct digital synthesizers (DDS) using the [`embedded-hal`] traits.
 
+This driver allows you to:
+- Enable/disable/reset the device. See `enable()`.
+- Set the frequency registers. See: `set_frequency()`.
+- Select the output frequency register. See: `select_frequency()`.
+- Set the phase registers. See: `set_phase()`.
+- Select the output phase register. See: `select_phase()`.
+- Set the frequency registers MSBs/LSBs separately. See: `set_frequency_msb()`.
+- Set the output waveform. See: `set_output_waveform()`.
+- Power down/up device parts. See: `set_powered_down()`.
+
 ## The devices
 
 The AD9833 and AD9837 are low power, programmable waveform generators capable of producing sine, triangular, and square wave outputs. Waveform generation is required in various types of sensing, actuation, and time domain reflectometry (TDR) applications. The output frequency and phase are software programmable, allowing easy tuning. No external components are needed. The frequency registers are 28 bits wide: with a 25 MHz clock rate, resolution of 0.1 Hz can be achieved; with a 1 MHz clock rate, the AD9833 can be tuned to 0.004 Hz resolution.
