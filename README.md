@@ -1,9 +1,7 @@
 # Rust AD9833/AD9837 Low-Power Programmable Waveform Generator / Direct Digital Synthesizer (DDS) Driver
 
-<!-- TODO
 [![crates.io](https://img.shields.io/crates/v/ad983x.svg)](https://crates.io/crates/ad983x)
 [![Docs](https://docs.rs/ad983x/badge.svg)](https://docs.rs/ad983x)
--->
 [![Build Status](https://travis-ci.org/eldruin/ad983x-rs.svg?branch=master)](https://travis-ci.org/eldruin/ad983x-rs)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ad983x-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ad983x-rs?branch=master)
 ![Maintenance Intention](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
