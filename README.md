@@ -67,12 +67,14 @@ fn main() {
 
 ## Status
 
-- [X] Compatible with AD9833
-- [ ] Compatible with AD9837
+- [X] Compatible with AD9833/AD9837
+- [ ] Compatible with AD9834/AD9838
+- [ ] Compatible with AD9832/AD9835
 
 ## Support
 
-For questions, issues, feature requests, and other changes, please file an
+For questions, issues, feature requests like compatibility with similar devices
+and other changes, please file an
 [issue in the github project](https://github.com/eldruin/ad983x-rs/issues).
 
 ## License

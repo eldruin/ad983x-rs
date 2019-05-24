@@ -7,11 +7,17 @@ extern crate embedded_hal_mock as hal;
 use self::hal::spi::Transaction as SpiTrans;
 
 mod base;
-use base::{destroy, new_ad9833, BitFlags as BF};
+use base::{destroy, new_ad9833, new_ad9837, BitFlags as BF};
 
 #[test]
-fn can_create_and_destroy() {
+fn can_create_and_destroy_ad9833() {
     let dev = new_ad9833(&[]);
+    destroy(dev);
+}
+
+#[test]
+fn can_create_and_destroy_ad9837() {
+    let dev = new_ad9837(&[]);
     destroy(dev);
 }
 

@@ -31,6 +31,10 @@ pub fn new_ad9833(transactions: &[SpiTrans]) -> Ad983x<SpiInterface<SpiMock, Dum
     Ad983x::new_ad9833(SpiMock::new(transactions), DummyOutputPin)
 }
 
+pub fn new_ad9837(transactions: &[SpiTrans]) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>> {
+    Ad983x::new_ad9837(SpiMock::new(transactions), DummyOutputPin)
+}
+
 pub fn destroy(device: Ad983x<SpiInterface<SpiMock, DummyOutputPin>>) {
     device.destroy().0.done();
 }
