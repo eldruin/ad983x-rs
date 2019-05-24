@@ -173,6 +173,7 @@
 #![no_std]
 
 extern crate embedded_hal as hal;
+use core::marker::PhantomData;
 use hal::spi::{Mode, Phase, Polarity};
 
 struct BitFlags;
@@ -258,6 +259,13 @@ pub struct SpiInterface<SPI, CS> {
     pub(crate) cs: CS,
 }
 
+/// Markers
+#[doc(hidden)]
+pub mod marker {
+    /// AD9833/AD9837 device
+    pub struct Ad9833Ad9837(());
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 struct Config {
     bits: u16,
@@ -278,12 +286,13 @@ impl Config {
 
 /// AD983x direct digital synthesizer
 #[derive(Debug, Default)]
-pub struct Ad983x<DI> {
+pub struct Ad983x<DI, IC> {
     iface: DI,
     control: Config,
+    _ic: PhantomData<IC>,
 }
 
-impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
+impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
     /// Create a new instance of an AD9833 device.
     /// Remember to call `reset()` before using the device after power up.
     pub fn new_ad9833(spi: SPI, chip_select: CS) -> Self {
@@ -295,6 +304,7 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
             control: Config {
                 bits: BitFlags::RESET,
             },
+            _ic: PhantomData,
         }
     }
     /// Create a new instance of an AD9837 device.
@@ -309,16 +319,19 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>> {
             control: Config {
                 bits: BitFlags::RESET,
             },
+            _ic: PhantomData,
         }
     }
+}
 
+impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
     /// Destroy driver instance, return SPI bus instance and CS output pin.
     pub fn destroy(self) -> (SPI, CS) {
         (self.iface.spi, self.iface.cs)
     }
 }
 
-impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>>
+impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837>
 where
     SPI: hal::blocking::spi::Write<u8, Error = E>,
     CS: hal::digital::OutputPin,
@@ -518,4 +531,13 @@ where
         };
         self.write_control(control)
     }
+}
+
+mod private {
+    use super::{marker, SpiInterface};
+    pub trait Sealed {}
+
+    impl<SPI, CS> Sealed for SpiInterface<SPI, CS> {}
+
+    impl Sealed for marker::Ad9833Ad9837 {}
 }

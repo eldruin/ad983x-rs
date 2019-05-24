@@ -1,4 +1,4 @@
-use ad983x::{Ad983x, SpiInterface};
+use ad983x::{marker, Ad983x, SpiInterface};
 use hal::spi::{Mock as SpiMock, Transaction as SpiTrans};
 
 pub struct BitFlags;
@@ -27,14 +27,18 @@ impl embedded_hal::digital::OutputPin for DummyOutputPin {
     fn set_high(&mut self) {}
 }
 
-pub fn new_ad9833(transactions: &[SpiTrans]) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>> {
+pub fn new_ad9833(
+    transactions: &[SpiTrans],
+) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>, marker::Ad9833Ad9837> {
     Ad983x::new_ad9833(SpiMock::new(transactions), DummyOutputPin)
 }
 
-pub fn new_ad9837(transactions: &[SpiTrans]) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>> {
+pub fn new_ad9837(
+    transactions: &[SpiTrans],
+) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>, marker::Ad9833Ad9837> {
     Ad983x::new_ad9837(SpiMock::new(transactions), DummyOutputPin)
 }
 
-pub fn destroy(device: Ad983x<SpiInterface<SpiMock, DummyOutputPin>>) {
+pub fn destroy<IC>(device: Ad983x<SpiInterface<SpiMock, DummyOutputPin>, IC>) {
     device.destroy().0.done();
 }
