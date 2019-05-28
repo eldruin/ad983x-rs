@@ -299,21 +299,18 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
     /// Create a new instance of an AD9833 device.
     /// Remember to call `reset()` before using the device after power up.
     pub fn new_ad9833(spi: SPI, chip_select: CS) -> Self {
-        Ad983x {
-            iface: SpiInterface {
-                spi,
-                cs: chip_select,
-            },
-            control: Config {
-                bits: BitFlags::RESET,
-            },
-            _ic: PhantomData,
-        }
+        Self::create(spi, chip_select)
     }
     /// Create a new instance of an AD9837 device.
     /// Remember to call `reset()` before using the device after power up.
     pub fn new_ad9837(spi: SPI, chip_select: CS) -> Self {
         // Behaves the same as AD9833
+        Self::create(spi, chip_select)
+    }
+}
+
+impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
+    fn create(spi: SPI, chip_select: CS) -> Self {
         Ad983x {
             iface: SpiInterface {
                 spi,
@@ -325,9 +322,6 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
             _ic: PhantomData,
         }
     }
-}
-
-impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
     /// Destroy driver instance, return SPI bus instance and CS output pin.
     pub fn destroy(self) -> (SPI, CS) {
         (self.iface.spi, self.iface.cs)
