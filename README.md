@@ -18,6 +18,8 @@ This driver allows you to:
 - Set the output waveform. See: `set_output_waveform()`.
 - Power down/up device parts. See: `set_powered_down()`.
 
+[Introductory blog post](https://blog.eldruin.com/ad983x-waveform-generator-dds-driver-in-rust/)
+
 ## The devices
 
 The AD9833 and AD9837 are low power, programmable waveform generators capable of producing sine, triangular, and square wave outputs. Waveform generation is required in various types of sensing, actuation, and time domain reflectometry (TDR) applications. The output frequency and phase are software programmable, allowing easy tuning. No external components are needed. The frequency registers are 28 bits wide: with a 25 MHz clock rate, resolution of 0.1 Hz can be achieved; with a 1 MHz clock rate, the AD9833 can be tuned to 0.004 Hz resolution.
