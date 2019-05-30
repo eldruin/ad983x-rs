@@ -192,6 +192,7 @@ impl BitFlags {
     const SLEEP_MCLK: u16 = 1 << 7; // SLEEP1
     const SLEEP_DAC: u16 = 1 << 6; // SLEEP12
     const OPBITEN: u16 = 1 << 5;
+    const SIGN_PIB: u16 = 1 << 4;
     const DIV2: u16 = 1 << 3;
     const MODE: u16 = 1 << 1;
 }
@@ -229,6 +230,21 @@ pub enum OutputWaveform {
     Sinusoidal,
     /// Triangle wave
     Triangle,
+    /// Square wave with its value matching the MSB of DAC data
+    /// (not available on AD9834/AD9838, use `SignBitOutput`)
+    SquareMsbOfDac,
+    /// Square wave with its value matching the MSB of DAC data divided by 2
+    /// (not available on AD9834/AD9838, use `SignBitOutput`)
+    SquareMsbOfDacDiv2,
+}
+
+/// Sign bit output on AD9834/AD9838 devices
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum SignBitOutput {
+    /// Disabled (high impedance) (default)
+    Disabled,
+    /// Comparator output
+    Comparator,
     /// Square wave with its value matching the MSB of DAC data
     SquareMsbOfDac,
     /// Square wave with its value matching the MSB of DAC data divided by 2
@@ -570,25 +586,59 @@ where
     }
 }
 
-    /// Set device parts powered-down state
-    pub fn set_powered_down(&mut self, config: PoweredDown) -> Result<(), Error<E>> {
-        let control = match config {
-            PoweredDown::Nothing => self
+impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>, marker::Ad9834Ad9838>
+where
+    SPI: hal::blocking::spi::Write<u8, Error = E>,
+    CS: hal::digital::OutputPin,
+{
+    /// Set the output waveform
+    ///
+    /// Will return `Error::InvalidArgument` for `SquareMsbOfDac` and `SquareMsbOfDacDiv2`
+    /// as this is not available on AD9834/AD9838 devices. To set the digital output,
+    /// please use
+    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), Error<E>> {
+        let control;
+        match waveform {
+            OutputWaveform::Sinusoidal => {
+                control = self
+                    .control
+                    .with_low(BitFlags::OPBITEN)
+                    .with_low(BitFlags::MODE)
+            }
+            OutputWaveform::Triangle => {
+                control = self
+                    .control
+                    .with_low(BitFlags::OPBITEN)
+                    .with_high(BitFlags::MODE)
+            }
+            OutputWaveform::SquareMsbOfDac => return Err(Error::InvalidArgument),
+            OutputWaveform::SquareMsbOfDacDiv2 => return Err(Error::InvalidArgument),
+        };
+        self.write_control(control)
+    }
+
+    /// Set the digital output
+    pub fn set_sign_bit_output(&mut self, configuration: SignBitOutput) -> Result<(), Error<E>> {
+        let control = match configuration {
+            SignBitOutput::Disabled => self.control.with_low(BitFlags::OPBITEN),
+            SignBitOutput::Comparator => self
                 .control
-                .with_low(BitFlags::SLEEP_MCLK)
-                .with_low(BitFlags::SLEEP_DAC),
-            PoweredDown::Dac => self
+                .with_high(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE)
+                .with_high(BitFlags::SIGN_PIB)
+                .with_high(BitFlags::DIV2),
+            SignBitOutput::SquareMsbOfDac => self
                 .control
-                .with_low(BitFlags::SLEEP_MCLK)
-                .with_high(BitFlags::SLEEP_DAC),
-            PoweredDown::InternalClock => self
+                .with_high(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE)
+                .with_low(BitFlags::SIGN_PIB)
+                .with_high(BitFlags::DIV2),
+            SignBitOutput::SquareMsbOfDacDiv2 => self
                 .control
-                .with_high(BitFlags::SLEEP_MCLK)
-                .with_low(BitFlags::SLEEP_DAC),
-            PoweredDown::DacAndInternalClock => self
-                .control
-                .with_high(BitFlags::SLEEP_MCLK)
-                .with_high(BitFlags::SLEEP_DAC),
+                .with_high(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE)
+                .with_low(BitFlags::SIGN_PIB)
+                .with_low(BitFlags::DIV2),
         };
         self.write_control(control)
     }

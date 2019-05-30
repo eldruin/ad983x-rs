@@ -1,7 +1,7 @@
 extern crate ad983x;
 use ad983x::{
     FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg,
-    PoweredDown as PD,
+    PoweredDown as PD, SignBitOutput as SBO,
 };
 extern crate embedded_hal_mock as hal;
 use self::hal::spi::Transaction as SpiTrans;
@@ -220,3 +220,48 @@ fn can_set_freq_lsb() {
     dev.set_frequency_lsb(FreqReg::F1, 0xDEF).unwrap();
     destroy(dev);
 }
+
+#[test]
+fn cannot_set_ow_dac_ad9838() {
+    let mut dev = new_ad9838(&[]);
+    dev.set_output_waveform(OW::SquareMsbOfDac)
+        .expect_err("Should return error");
+    destroy(dev);
+}
+
+#[test]
+fn cannot_set_ow_dac_div2_ad9838() {
+    let mut dev = new_ad9838(&[]);
+    dev.set_output_waveform(OW::SquareMsbOfDacDiv2)
+        .expect_err("Should return error");
+    destroy(dev);
+}
+
+macro_rules! sbo_test {
+    ($name:ident, $sbo:ident, $control:expr) => {
+        #[test]
+        fn $name() {
+            let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
+            let mut dev = new_ad9838(&transitions);
+            dev.set_sign_bit_output(SBO::$sbo).unwrap();
+            destroy(dev);
+        }
+    };
+}
+
+sbo_test!(can_set_disabled_sign_out, Disabled, 0);
+sbo_test!(
+    can_set_comp_sign_out,
+    Comparator,
+    BF::OPBITEN | BF::SIGN_PIB | BF::DIV2
+);
+sbo_test!(
+    can_set_sq_msb_sign_out,
+    SquareMsbOfDac,
+    BF::OPBITEN | BF::DIV2
+);
+sbo_test!(
+    can_set_sq_msb_div2_sign_out,
+    SquareMsbOfDacDiv2,
+    BF::OPBITEN
+);
