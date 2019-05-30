@@ -1,6 +1,6 @@
-//! This is a platform agnostic Rust driver for the AD9833 and AD9837 low-power
-//! programmable waveform generators / direct digital synthesizers (DDS)
-//! using the [`embedded-hal`] traits.
+//! This is a platform agnostic Rust driver for the AD9833, AD9834, AD9837
+//! and AD9838 low-power programmable waveform generators / direct digital
+//! synthesizers (DDS) using the [`embedded-hal`] traits.
 //!
 //! [`embedded-hal`]: https://github.com/rust-embedded/embedded-hal
 //!
@@ -13,6 +13,7 @@
 //! - Set the frequency registers MSBs/LSBs separately. See: [`set_frequency_msb()`].
 //! - Set the output waveform. See: [`set_output_waveform()`].
 //! - Power down/up device parts. See: [`set_powered_down()`].
+//! - Select control source on AD9834/AD9838. See: [`set_control_source()`].
 //!
 //! [`enable()`]: struct.Ad983x.html#method.enable
 //! [`set_frequency()`]: struct.Ad983x.html#method.set_frequency
@@ -22,26 +23,29 @@
 //! [`set_frequency_msb()`]: struct.Ad983x.html#method.set_frequency_msb
 //! [`set_output_waveform()`]: struct.Ad983x.html#method.set_output_waveform
 //! [`set_powered_down()`]: struct.Ad983x.html#method.set_powered_down
+//! [`set_control_source()`]: struct.Ad983x.html#method.set_control_source
 //!
 //! ## The devices
 //!
-//! The AD9833 and AD9837 are low power, programmable waveform generators
-//! capable of producing sine, triangular, and square wave outputs. Waveform
-//! generation is required in various types of sensing, actuation, and time
-//! domain reflectometry (TDR) applications. The output frequency and phase
-//! are software programmable, allowing easy tuning. No external components
-//! are needed. The frequency registers are 28 bits wide: with a 25 MHz clock
-//! rate, resolution of 0.1 Hz can be achieved; with a 1 MHz clock rate, the
-//! AD9833 can be tuned to 0.004 Hz resolution.
+//! The AD9833, AD9834, AD9837 and AD9838 are low power, programmable waveform
+//! generators capable of producing sine, triangular, and square wave outputs.
+//! Waveform generation is required in various types of sensing, actuation,
+//! and time domain reflectometry (TDR) applications. The output frequency and
+//! phase are software programmable, allowing easy tuning. No external
+//! components are needed. The frequency registers are 28 bits wide: with a
+//! 25 MHz clock rate, resolution of 0.1 Hz can be achieved; with a 1 MHz
+//! clock rate, the AD9833 can be tuned to 0.004 Hz resolution.
 //!
-//! The AD9833 and AD9837 are written to via a 3-wire serial interface (SPI).
+//! The devices are written to via a 3-wire serial interface (SPI).
 //! This serial interface operates at clock rates up to 40 MHz and is
-//! compatible with DSP and microcontroller standards. The device operates
+//! compatible with DSP and microcontroller standards. The devices operate
 //! with a power supply from 2.3 V to 5.5 V.
 //!
 //! Datasheets:
 //! - [AD9833](https://www.analog.com/media/en/technical-documentation/data-sheets/ad9833.PDF)
+//! - [AD9834](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9834.PDF)
 //! - [AD9837](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9837.PDF)
+//! - [AD9838](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9838.PDF)
 //!
 //! Application Note:
 //! - [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)

@@ -1,4 +1,4 @@
-# Rust AD9833/AD9837 Low-Power Programmable Waveform Generator / Direct Digital Synthesizer (DDS) Driver
+# Rust AD983x Low-Power Programmable Waveform Generator / Direct Digital Synthesizer (DDS) Driver
 
 [![crates.io](https://img.shields.io/crates/v/ad983x.svg)](https://crates.io/crates/ad983x)
 [![Docs](https://docs.rs/ad983x/badge.svg)](https://docs.rs/ad983x)
@@ -6,7 +6,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ad983x-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ad983x-rs?branch=master)
 ![Maintenance Intention](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 
-This is a platform agnostic Rust driver for the AD9833 and AD9837 low-power programmable waveform generators / direct digital synthesizers (DDS) using the [`embedded-hal`] traits.
+This is a platform agnostic Rust driver for the AD9833, AD9834, AD9837 and AD9838 low-power programmable waveform generators / direct digital synthesizers (DDS) using the [`embedded-hal`] traits.
 
 This driver allows you to:
 - Enable/disable/reset the device. See `enable()`.
@@ -17,18 +17,21 @@ This driver allows you to:
 - Set the frequency registers MSBs/LSBs separately. See: `set_frequency_msb()`.
 - Set the output waveform. See: `set_output_waveform()`.
 - Power down/up device parts. See: `set_powered_down()`.
+- Select control source on AD9834/AD9838. See: `set_control_source()`.
 
 [Introductory blog post](https://blog.eldruin.com/ad983x-waveform-generator-dds-driver-in-rust/)
 
 ## The devices
 
-The AD9833 and AD9837 are low power, programmable waveform generators capable of producing sine, triangular, and square wave outputs. Waveform generation is required in various types of sensing, actuation, and time domain reflectometry (TDR) applications. The output frequency and phase are software programmable, allowing easy tuning. No external components are needed. The frequency registers are 28 bits wide: with a 25 MHz clock rate, resolution of 0.1 Hz can be achieved; with a 1 MHz clock rate, the AD9833 can be tuned to 0.004 Hz resolution.
+The AD9833, AD9834, AD9837 and AD9838 are low power, programmable waveform generators capable of producing sine, triangular, and square wave outputs. Waveform generation is required in various types of sensing, actuation, and time domain reflectometry (TDR) applications. The output frequency and phase are software programmable, allowing easy tuning. No external components are needed. The frequency registers are 28 bits wide: with a 25 MHz clock rate, resolution of 0.1 Hz can be achieved; with a 1 MHz clock rate, the AD9833 can be tuned to 0.004 Hz resolution.
 
-The AD9833 and AD9837 are written to via a 3-wire serial interface (SPI). This serial interface operates at clock rates up to 40 MHz and is compatible with DSP and microcontroller standards. The device operates with a power supply from 2.3 V to 5.5 V.
+The devices are written to via a 3-wire serial interface (SPI). This serial interface operates at clock rates up to 40 MHz and is compatible with DSP and microcontroller standards. The devices operate with a power supply from 2.3 V to 5.5 V.
 
 Datasheets:
 - [AD9833](https://www.analog.com/media/en/technical-documentation/data-sheets/ad9833.PDF)
+- [AD9834](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9834.PDF)
 - [AD9837](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9837.PDF)
+- [AD9838](https://www.analog.com/media/en/technical-documentation/data-sheets/AD9838.PDF)
 
 Application Note:
 - [Programming the AD9833/AD9834](https://www.analog.com/media/en/technical-documentation/application-notes/AN-1070.pdf)
@@ -71,7 +74,7 @@ fn main() {
 ## Status
 
 - [X] Compatible with AD9833/AD9837
-- [ ] Compatible with AD9834/AD9838
+- [X] Compatible with AD9834/AD9838
 - [ ] Compatible with AD9832/AD9835
 
 ## Support
