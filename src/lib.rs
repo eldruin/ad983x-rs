@@ -49,6 +49,15 @@
 //! Article explaining DDS using an AD9833:
 //! - [All about direct digital synthesis](https://www.analog.com/en/analog-dialogue/articles/all-about-direct-digital-synthesis.html)
 //!
+//! ## Pin / Software control source on AD9834/AD9838
+//!
+//! AD9834/AD9838 devices offer the possibility to control several functions
+//! either through hardware pins or software settings. While hardware pin
+//! control is selected, these software operations will be ignored by the hardware.
+//! This driver allows this as well as it would be a valid use case to
+//! configure the status of these functions while on hardware pin control mode
+//! in preparation for a smooth switch to software control.
+//!
 //! ## Usage examples (see also examples folder)
 //!
 //! To use this driver, import this crate and an `embedded_hal` implementation,
@@ -188,6 +197,7 @@ impl BitFlags {
     const HLB: u16 = 1 << 12;
     const FSELECT: u16 = 1 << 11;
     const PSELECT: u16 = 1 << 10;
+    const PIN_SW: u16 = 1 << 9;
     const RESET: u16 = 1 << 8;
     const SLEEP_MCLK: u16 = 1 << 7; // SLEEP1
     const SLEEP_DAC: u16 = 1 << 6; // SLEEP12
@@ -262,6 +272,18 @@ pub enum PoweredDown {
     InternalClock,
     /// Power down the DAC and disable the internal clock
     DacAndInternalClock,
+}
+
+/// Hardware pin / software control source for the functions:
+/// frequency register selection, phase register selection,
+/// reset of internal registers, and DAC power-down.
+/// (Only available on AD9834 and AD9838 devices)
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ControlSource {
+    /// Functions are controlled only through software (default)
+    Software,
+    /// Functions are controlled only through hardware pins
+    HardwarePins,
 }
 
 /// SPI mode (CPOL = 1, CPHA = 0)
@@ -639,6 +661,17 @@ where
                 .with_low(BitFlags::MODE)
                 .with_low(BitFlags::SIGN_PIB)
                 .with_low(BitFlags::DIV2),
+        };
+        self.write_control(control)
+    }
+
+    /// Set the control source used for the functions:
+    /// frequency register selection, phase register selection,
+    /// reset of internal registers, and DAC power-down.
+    pub fn set_control_source(&mut self, source: ControlSource) -> Result<(), Error<E>> {
+        let control = match source {
+            ControlSource::Software => self.control.with_low(BitFlags::PIN_SW),
+            ControlSource::HardwarePins => self.control.with_high(BitFlags::PIN_SW),
         };
         self.write_control(control)
     }

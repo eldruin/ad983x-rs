@@ -10,6 +10,7 @@ impl BitFlags {
     pub const HLB: u8 = 1 << 4;
     pub const FSELECT: u8 = 1 << 3;
     pub const PSELECT: u8 = 1 << 2;
+    pub const PIN_SW: u8 = 1 << 1;
     pub const SLEEP_MCLK: u8 = 1 << 7;
     pub const SLEEP_DAC: u8 = 1 << 6;
     pub const OPBITEN: u8 = 1 << 5;

@@ -1,6 +1,6 @@
 extern crate ad983x;
 use ad983x::{
-    FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg,
+    ControlSource, FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg,
     PoweredDown as PD, SignBitOutput as SBO,
 };
 extern crate embedded_hal_mock as hal;
@@ -265,3 +265,19 @@ sbo_test!(
     SquareMsbOfDacDiv2,
     BF::OPBITEN
 );
+
+#[test]
+fn can_set_control_source_sw() {
+    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let mut dev = new_ad9838(&transitions);
+    dev.set_control_source(ControlSource::Software).unwrap();
+    destroy(dev);
+}
+
+#[test]
+fn can_set_control_source_hw_pins() {
+    let transitions = [SpiTrans::write(vec![BF::RESET | BF::PIN_SW, 0])];
+    let mut dev = new_ad9838(&transitions);
+    dev.set_control_source(ControlSource::HardwarePins).unwrap();
+    destroy(dev);
+}
