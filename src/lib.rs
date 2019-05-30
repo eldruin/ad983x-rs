@@ -225,7 +225,7 @@ pub enum PhaseRegister {
 /// Output waveform
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OutputWaveform {
-    /// Sinusoidal wave
+    /// Sinusoidal wave (default)
     Sinusoidal,
     /// Triangle wave
     Triangle,
@@ -238,7 +238,7 @@ pub enum OutputWaveform {
 /// Powered-down device configuration
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PoweredDown {
-    /// All chip parts are enabled
+    /// All chip parts are enabled (default)
     Nothing,
     /// Power down only the DAC
     Dac,
