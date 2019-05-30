@@ -149,21 +149,33 @@ fn can_select_phase1() {
 }
 
 macro_rules! ow_test {
-    ($name:ident, $ow:ident, $control:expr) => {
+    ($name:ident, $create:ident, $ow:ident, $control:expr) => {
         #[test]
         fn $name() {
             let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
-            let mut dev = new_ad9833(&transitions);
+            let mut dev = $create(&transitions);
             dev.set_output_waveform(OW::$ow).unwrap();
             destroy(dev);
         }
     };
 }
 
-ow_test!(can_set_sinusoidal_out, Sinusoidal, 0);
-ow_test!(can_set_triangle_out, Triangle, BF::MODE);
-ow_test!(can_set_sq_msb_out, SquareMsbOfDac, BF::OPBITEN | BF::DIV2);
-ow_test!(can_set_sq_msb_div2_out, SquareMsbOfDacDiv2, BF::OPBITEN);
+ow_test!(can_set_sinusoidal_out, new_ad9833, Sinusoidal, 0);
+ow_test!(can_set_triangle_out, new_ad9833, Triangle, BF::MODE);
+ow_test!(
+    can_set_sq_msb_out,
+    new_ad9833,
+    SquareMsbOfDac,
+    BF::OPBITEN | BF::DIV2
+);
+ow_test!(
+    can_set_sq_msb_div2_out,
+    new_ad9833,
+    SquareMsbOfDacDiv2,
+    BF::OPBITEN
+);
+ow_test!(can_set_sinusoidal_out_ad9838, new_ad9838, Sinusoidal, 0);
+ow_test!(can_set_triangle_out_ad9838, new_ad9838, Triangle, BF::MODE);
 
 macro_rules! pd_test {
     ($name:ident, $pd:ident, $control:expr) => {
