@@ -181,6 +181,26 @@
 //! dds.set_powered_down(PoweredDown::Dac).unwrap();
 //! # }
 //! ```
+//!
+//! ### Use hardware pins as control source
+//!
+//! ```no_run
+//! extern crate ad983x;
+//! extern crate linux_embedded_hal;
+//!
+//! use ad983x::{Ad983x, ControlSource};
+//! use linux_embedded_hal::{Pin, Spidev};
+//!
+//! # fn main() {
+//! let spi = Spidev::open("/dev/spidev0.0").unwrap();
+//! let chip_select = Pin::new(25);
+//! let mut dds = Ad983x::new_ad9838(spi, chip_select);
+//! dds.reset().unwrap(); // reset is necessary before operation
+//! dds.set_control_source(ControlSource::HardwarePins).unwrap();
+//! // Hardware pins can now be used to control the device.
+//! // The corresponding software settings will be ignored.
+//! # }
+//! ```
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
