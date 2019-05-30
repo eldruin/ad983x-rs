@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+...
+
+## [0.1.1] - 2019-05-30
+
 ### Added
 - Support for AD9834 and AD9838 devices.
 
@@ -15,4 +19,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 Initial release to crates.io. AD9833 and AD9837 devices are fully supported.
 All changes will be documented in this CHANGELOG.
 
-[Unreleased]: https://github.com/eldruin/ad983x-rs/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/eldruin/ad983x-rs/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/eldruin/ad983x-rs/compare/v0.1.0...v0.1.1
