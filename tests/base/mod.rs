@@ -33,10 +33,22 @@ pub fn new_ad9833(
     Ad983x::new_ad9833(SpiMock::new(transactions), DummyOutputPin)
 }
 
+pub fn new_ad9834(
+    transactions: &[SpiTrans],
+) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>, marker::Ad9834Ad9838> {
+    Ad983x::new_ad9834(SpiMock::new(transactions), DummyOutputPin)
+}
+
 pub fn new_ad9837(
     transactions: &[SpiTrans],
 ) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>, marker::Ad9833Ad9837> {
     Ad983x::new_ad9837(SpiMock::new(transactions), DummyOutputPin)
+}
+
+pub fn new_ad9838(
+    transactions: &[SpiTrans],
+) -> Ad983x<SpiInterface<SpiMock, DummyOutputPin>, marker::Ad9834Ad9838> {
+    Ad983x::new_ad9838(SpiMock::new(transactions), DummyOutputPin)
 }
 
 pub fn destroy<IC>(device: Ad983x<SpiInterface<SpiMock, DummyOutputPin>, IC>) {

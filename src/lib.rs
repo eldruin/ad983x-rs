@@ -267,6 +267,8 @@ pub struct SpiInterface<SPI, CS> {
 pub mod marker {
     /// AD9833/AD9837 device
     pub struct Ad9833Ad9837(());
+    /// AD9834/AD9838 device
+    pub struct Ad9834Ad9838(());
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -309,6 +311,20 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
     }
 }
 
+impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9834Ad9838> {
+    /// Create a new instance of an AD9834 device.
+    /// Remember to call `reset()` before using the device after power up.
+    pub fn new_ad9834(spi: SPI, chip_select: CS) -> Self {
+        Self::create(spi, chip_select)
+    }
+
+    /// Create a new instance of an AD9838 device.
+    /// Remember to call `reset()` before using the device after power up.
+    pub fn new_ad9838(spi: SPI, chip_select: CS) -> Self {
+        Self::create(spi, chip_select)
+    }
+}
+
 impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
     fn create(spi: SPI, chip_select: CS) -> Self {
         Ad983x {
@@ -322,60 +338,43 @@ impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
             _ic: PhantomData,
         }
     }
-    /// Destroy driver instance, return SPI bus instance and CS output pin.
-    pub fn destroy(self) -> (SPI, CS) {
-        (self.iface.spi, self.iface.cs)
-    }
 }
 
-impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837>
+impl<SPI, CS, E, IC> Ad983x<SpiInterface<SPI, CS>, IC>
 where
     SPI: hal::blocking::spi::Write<u8, Error = E>,
     CS: hal::digital::OutputPin,
 {
+    /// Destroy driver instance, return SPI bus instance and CS output pin.
+    pub fn destroy(self) -> (SPI, CS) {
+        (self.iface.spi, self.iface.cs)
+    }
+
     /// Resets the internal registers and leaves the device disabled.
+    ///
+    /// Note that this is ignored in AD9834/AD9838 devices if hardware pin
+    /// control source is selected.
     pub fn reset(&mut self) -> Result<(), Error<E>> {
         self.disable()
     }
 
     /// Disable the device (enable reset)
     ///
-    /// This resets the internal registers
+    /// This resets the internal registers.
+    /// Note that this is ignored in AD9834/AD9838 devices if hardware pin
+    /// control source is selected.
     pub fn disable(&mut self) -> Result<(), Error<E>> {
         let control = self.control.with_high(BitFlags::RESET);
         self.write_control(control)
     }
 
     /// Enable the device (disable reset)
+    ///
+    /// Note that this is ignored in AD9834/AD9838 devices if hardware pin
+    /// control source is selected.
     pub fn enable(&mut self) -> Result<(), Error<E>> {
         let control = self.control.with_low(BitFlags::RESET);
         self.write_control(control)
-    }
-
-    fn write_control_if_different(&mut self, control: Config) -> Result<(), Error<E>> {
-        if control != self.control {
-            self.write_control(control)
-        } else {
-            Ok(())
-        }
-    }
-
-    fn write_control(&mut self, control: Config) -> Result<(), Error<E>> {
-        let payload = control.bits & 0b0011_1111_1111_1111;
-        self.write(payload)?;
-        self.control = control;
-        Ok(())
-    }
-
-    fn write(&mut self, payload: u16) -> Result<(), Error<E>> {
-        self.iface.cs.set_low();
-        let result = self
-            .iface
-            .spi
-            .write(&[(payload >> 8) as u8, payload as u8])
-            .map_err(Error::Spi);
-        self.iface.cs.set_high();
-        result
     }
 
     fn check_value_fits<T>(value: T, bit_count: T) -> Result<(), Error<E>>
@@ -451,6 +450,9 @@ where
     }
 
     /// Select the frequency register that is used
+    ///
+    /// Note: this can be overriden through the FSELECT pin in AD9834/AD9838
+    /// devices if hardware pin control source is selected.
     pub fn select_frequency(&mut self, register: FrequencyRegister) -> Result<(), Error<E>> {
         let control = match register {
             FrequencyRegister::F0 => self.control.with_low(BitFlags::FSELECT),
@@ -472,7 +474,10 @@ where
         self.write(value)
     }
 
-    /// Select the phase register that is used
+    /// Select the phase register that is used.
+    ///
+    /// Note: this can be overriden through the PSELECT pin in AD9834/AD9838
+    /// devices if hardware pin control source is selected.
     pub fn select_phase(&mut self, register: PhaseRegister) -> Result<(), Error<E>> {
         let control = match register {
             PhaseRegister::P0 => self.control.with_low(BitFlags::PSELECT),
@@ -481,6 +486,64 @@ where
         self.write_control(control)
     }
 
+    /// Set device parts powered-down state.
+    ///
+    /// Note: This can be overriden through the SLEEP pin
+    /// in AD9834/AD9838 devices if hardware pin control source is selected.
+    pub fn set_powered_down(&mut self, config: PoweredDown) -> Result<(), Error<E>> {
+        let control = match config {
+            PoweredDown::Nothing => self
+                .control
+                .with_low(BitFlags::SLEEP_MCLK)
+                .with_low(BitFlags::SLEEP_DAC),
+            PoweredDown::Dac => self
+                .control
+                .with_low(BitFlags::SLEEP_MCLK)
+                .with_high(BitFlags::SLEEP_DAC),
+            PoweredDown::InternalClock => self
+                .control
+                .with_high(BitFlags::SLEEP_MCLK)
+                .with_low(BitFlags::SLEEP_DAC),
+            PoweredDown::DacAndInternalClock => self
+                .control
+                .with_high(BitFlags::SLEEP_MCLK)
+                .with_high(BitFlags::SLEEP_DAC),
+        };
+        self.write_control(control)
+    }
+
+    fn write_control_if_different(&mut self, control: Config) -> Result<(), Error<E>> {
+        if control != self.control {
+            self.write_control(control)
+        } else {
+            Ok(())
+        }
+    }
+
+    fn write_control(&mut self, control: Config) -> Result<(), Error<E>> {
+        let payload = control.bits & 0b0011_1111_1111_1111;
+        self.write(payload)?;
+        self.control = control;
+        Ok(())
+    }
+
+    fn write(&mut self, payload: u16) -> Result<(), Error<E>> {
+        self.iface.cs.set_low();
+        let result = self
+            .iface
+            .spi
+            .write(&[(payload >> 8) as u8, payload as u8])
+            .map_err(Error::Spi);
+        self.iface.cs.set_high();
+        result
+    }
+}
+
+impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837>
+where
+    SPI: hal::blocking::spi::Write<u8, Error = E>,
+    CS: hal::digital::OutputPin,
+{
     /// Set the output waveform
     pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), Error<E>> {
         let control = match waveform {
@@ -505,6 +568,7 @@ where
         };
         self.write_control(control)
     }
+}
 
     /// Set device parts powered-down state
     pub fn set_powered_down(&mut self, config: PoweredDown) -> Result<(), Error<E>> {
@@ -537,4 +601,5 @@ mod private {
     impl<SPI, CS> Sealed for SpiInterface<SPI, CS> {}
 
     impl Sealed for marker::Ad9833Ad9837 {}
+    impl Sealed for marker::Ad9834Ad9838 {}
 }
