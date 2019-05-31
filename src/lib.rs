@@ -210,7 +210,7 @@
 
 extern crate embedded_hal as hal;
 use core::marker::PhantomData;
-use hal::spi::{Mode, Phase, Polarity};
+use hal::spi::{Mode, MODE_2};
 
 /// All possible errors in this crate
 #[derive(Debug)]
@@ -293,10 +293,7 @@ pub enum ControlSource {
 }
 
 /// SPI mode (CPOL = 1, CPHA = 0)
-pub const MODE: Mode = Mode {
-    phase: Phase::CaptureOnFirstTransition,
-    polarity: Polarity::IdleHigh,
-};
+pub const MODE: Mode = MODE_2;
 
 /// SPI interface
 #[doc(hidden)]
