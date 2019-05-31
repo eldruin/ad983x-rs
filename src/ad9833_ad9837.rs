@@ -1,4 +1,4 @@
-use {marker, Ad983x, BitFlags, Error, OutputWaveform, SpiInterface};
+use {marker, Ad983x, BitFlags, Error, OutputWaveform, SpiInterface, SpiWrite};
 
 impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
     /// Create a new instance of an AD9833 device.
@@ -14,13 +14,12 @@ impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
     }
 }
 
-impl<SPI, CS, E> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837>
+impl<CommE, PinE, DI> Ad983x<DI, marker::Ad9833Ad9837>
 where
-    SPI: hal::blocking::spi::Write<u8, Error = E>,
-    CS: hal::digital::OutputPin,
+    DI: SpiWrite<Error = Error<CommE, PinE>>,
 {
     /// Set the output waveform
-    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), Error<E>> {
+    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), DI::Error> {
         let control = match waveform {
             OutputWaveform::Sinusoidal => self
                 .control

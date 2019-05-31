@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-...
+### Changed
+- Use `embedded_hal::digital::v2::OutputPin` traits for SPI chip-select pin.
 
 ## [0.1.1] - 2019-05-30
 

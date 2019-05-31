@@ -214,9 +214,11 @@ use hal::spi::{Mode, MODE_2};
 
 /// All possible errors in this crate
 #[derive(Debug)]
-pub enum Error<E> {
+pub enum Error<CommE, PinE> {
     /// SPI communication error
-    Spi(E),
+    Spi(CommE),
+    /// Pin setting error
+    Pin(PinE),
     /// Invalid argument provided
     InvalidArgument,
 }
@@ -303,6 +305,13 @@ pub struct SpiInterface<SPI, CS> {
     pub(crate) cs: CS,
 }
 
+/// write interface trait
+#[doc(hidden)]
+pub trait SpiWrite {
+    type Error;
+    fn write(&mut self, payload: u16) -> Result<(), Self::Error>;
+}
+
 /// Markers
 #[doc(hidden)]
 pub mod marker {
@@ -332,10 +341,11 @@ mod ad9834_ad9838;
 mod common;
 
 mod private {
-    use super::{marker, SpiInterface};
+    use super::{marker, Error, SpiInterface, SpiWrite};
     pub trait Sealed {}
 
     impl<SPI, CS> Sealed for SpiInterface<SPI, CS> {}
+    impl<CommE, PinE> Sealed for SpiWrite<Error = Error<CommE, PinE>> {}
 
     impl Sealed for marker::Ad9833Ad9837 {}
     impl Sealed for marker::Ad9834Ad9838 {}
