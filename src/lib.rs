@@ -25,6 +25,8 @@
 //! [`set_powered_down()`]: struct.Ad983x.html#method.set_powered_down
 //! [`set_control_source()`]: struct.Ad983x.html#method.set_control_source
 //!
+//! [Introductory blog post](https://blog.eldruin.com/ad983x-waveform-generator-dds-driver-in-rust/)
+//! 
 //! ## The devices
 //!
 //! The AD9833, AD9834, AD9837 and AD9838 are low power, programmable waveform
