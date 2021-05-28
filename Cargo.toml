@@ -27,7 +27,7 @@ coveralls = { repository = "eldruin/ad983x-rs", branch = "master", service = "gi
 embedded-hal = "0.2.3"
 
 [dev-dependencies]
-linux-embedded-hal = "0.2"
+linux-embedded-hal = "0.3"
 embedded-hal-mock = "0.7"
 
 [profile.release]
