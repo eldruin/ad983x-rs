@@ -126,13 +126,6 @@ jobs:
           command: test
           args: --target=${{ matrix.TARGET }}
 
-      - name: Build examples
-        uses: actions-rs/cargo@v1
-        if: contains(matrix.TARGET, 'x86_64')
-        with:
-          command: build
-          args: --target=${{ matrix.TARGET }} --examples
-
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
