@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/ad983x.svg)](https://crates.io/crates/ad983x)
 [![Docs](https://docs.rs/ad983x/badge.svg)](https://docs.rs/ad983x)
-[![Build Status](https://travis-ci.org/eldruin/ad983x-rs.svg?branch=master)](https://travis-ci.org/eldruin/ad983x-rs)
+[![Build Status](https://github.com/eldruin/ad983x-rs/workflows/Build/badge.svg)](https://github.com/eldruin/ad983x-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ad983x-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ad983x-rs?branch=master)
 
 This is a platform agnostic Rust driver for the AD9833, AD9834, AD9837 and AD9838 low-power programmable waveform generators / direct digital synthesizers (DDS) using the [`embedded-hal`] traits.

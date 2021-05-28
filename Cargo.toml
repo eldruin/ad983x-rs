@@ -19,10 +19,6 @@ include = [
     "/LICENSE-APACHE",
 ]
 
-[badges]
-travis-ci = { repository = "eldruin/ad983x-rs", branch = "master" }
-coveralls = { repository = "eldruin/ad983x-rs", branch = "master", service = "github" }
-
 [dependencies]
 embedded-hal = "0.2.3"
 
