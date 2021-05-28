@@ -26,7 +26,7 @@
 //! [`set_control_source()`]: struct.Ad983x.html#method.set_control_source
 //!
 //! [Introductory blog post](https://blog.eldruin.com/ad983x-waveform-generator-dds-driver-in-rust/)
-//! 
+//!
 //! ## The devices
 //!
 //! The AD9833, AD9834, AD9837 and AD9838 are low power, programmable waveform
@@ -309,7 +309,7 @@ pub struct SpiInterface<SPI, CS> {
 
 /// write interface trait
 #[doc(hidden)]
-pub trait SpiWrite {
+pub trait SpiWrite: private::Sealed {
     type Error;
     fn write(&mut self, payload: u16) -> Result<(), Self::Error>;
 }
@@ -343,11 +343,10 @@ mod ad9834_ad9838;
 mod common;
 
 mod private {
-    use super::{marker, Error, SpiInterface, SpiWrite};
+    use super::{marker, SpiInterface};
     pub trait Sealed {}
 
     impl<SPI, CS> Sealed for SpiInterface<SPI, CS> {}
-    impl<CommE, PinE> Sealed for SpiWrite<Error = Error<CommE, PinE>> {}
 
     impl Sealed for marker::Ad9833Ad9837 {}
     impl Sealed for marker::Ad9834Ad9838 {}
