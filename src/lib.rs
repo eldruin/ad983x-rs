@@ -81,13 +81,9 @@
 //! ### Set the frequency register 0 and enable
 //!
 //! ```no_run
-//! extern crate ad983x;
-//! extern crate linux_embedded_hal;
-//!
 //! use ad983x::{Ad983x, FrequencyRegister};
 //! use linux_embedded_hal::{Pin, Spidev};
 //!
-//! # fn main() {
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
 //! let chip_select = Pin::new(25);
 //! let mut dds = Ad983x::new_ad9833(spi, chip_select);
@@ -100,7 +96,6 @@
 //!
 //! // Get SPI device and CS pin back
 //! let (_spi, _chip_select) = dds.destroy();
-//! # }
 //! ```
 //!
 //! ### Set frequency registers 0 and 1 and alternate between them
@@ -108,13 +103,9 @@
 //! With a 25 MHz clock this alternates between A4 and D5 tones.
 //!
 //! ```no_run
-//! extern crate ad983x;
-//! extern crate linux_embedded_hal;
-//!
 //! use ad983x::{Ad983x, FrequencyRegister};
 //! use linux_embedded_hal::{Pin, Spidev};
 //!
-//! # fn main() {
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
 //! let chip_select = Pin::new(25);
 //! let mut dds = Ad983x::new_ad9833(spi, chip_select);
@@ -130,74 +121,54 @@
 //!     // some delay
 //!     dds.select_frequency(FrequencyRegister::F0).unwrap();
 //! }
-//! # }
 //! ```
 //!
 //! ### Set the phase register 1 and select it
 //!
 //! ```no_run
-//! extern crate ad983x;
-//! extern crate linux_embedded_hal;
-//!
 //! use ad983x::{Ad983x, PhaseRegister};
 //! use linux_embedded_hal::{Pin, Spidev};
 //!
-//! # fn main() {
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
 //! let chip_select = Pin::new(25);
 //! let mut dds = Ad983x::new_ad9833(spi, chip_select);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_phase(PhaseRegister::P1, 4724).unwrap();
 //! dds.select_phase(PhaseRegister::P1).unwrap();
-//! # }
 //! ```
 //!
 //! ### Set output waveform to be triangular
 //!
 //! ```no_run
-//! extern crate ad983x;
-//! extern crate linux_embedded_hal;
-//!
 //! use ad983x::{Ad983x, OutputWaveform};
 //! use linux_embedded_hal::{Pin, Spidev};
 //!
-//! # fn main() {
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
 //! let chip_select = Pin::new(25);
 //! let mut dds = Ad983x::new_ad9833(spi, chip_select);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_output_waveform(OutputWaveform::Triangle).unwrap();
-//! # }
 //! ```
 //!
 //! ### Power down the DAC
 //!
 //! ```no_run
-//! extern crate ad983x;
-//! extern crate linux_embedded_hal;
-//!
 //! use ad983x::{Ad983x, PoweredDown};
 //! use linux_embedded_hal::{Pin, Spidev};
 //!
-//! # fn main() {
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
 //! let chip_select = Pin::new(25);
 //! let mut dds = Ad983x::new_ad9833(spi, chip_select);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_powered_down(PoweredDown::Dac).unwrap();
-//! # }
 //! ```
 //!
 //! ### Use hardware pins as control source
 //!
 //! ```no_run
-//! extern crate ad983x;
-//! extern crate linux_embedded_hal;
-//!
 //! use ad983x::{Ad983x, ControlSource};
 //! use linux_embedded_hal::{Pin, Spidev};
 //!
-//! # fn main() {
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
 //! let chip_select = Pin::new(25);
 //! let mut dds = Ad983x::new_ad9838(spi, chip_select);
@@ -205,14 +176,12 @@
 //! dds.set_control_source(ControlSource::HardwarePins).unwrap();
 //! // Hardware pins can now be used to control the device.
 //! // The corresponding software settings will be ignored.
-//! # }
 //! ```
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
-extern crate embedded_hal as hal;
 use core::marker::PhantomData;
-use hal::spi::{Mode, MODE_2};
+use embedded_hal::spi::{Mode, MODE_2};
 
 /// All possible errors in this crate
 #[derive(Debug)]

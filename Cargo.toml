@@ -10,6 +10,7 @@ keywords = ["waveform", "generator", "dds", "embedded-hal-driver"]
 categories = ["embedded", "hardware-support", "no-std"]
 homepage = "https://github.com/eldruin/ad983x-rs"
 documentation = "https://docs.rs/ad983x"
+edition = "2018"
 include = [
     "/**/*.rs",
     "/Cargo.toml",

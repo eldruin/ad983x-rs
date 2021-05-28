@@ -1,4 +1,4 @@
-use {
+use crate::{
     marker, Ad983x, BitFlags, ControlSource, Error, OutputWaveform, SignBitOutput, SpiInterface,
     SpiWrite,
 };

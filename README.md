@@ -48,9 +48,6 @@ I wrote an example MIDI player that plays Beethoven's ninth symphony in hardware
 [driver-examples]: https://github.com/eldruin/driver-examples
 
 ```rust
-extern crate ad983x;
-extern crate linux_embedded_hal;
-
 use ad983x::{Ad983x, FrequencyRegister};
 use linux_embedded_hal::{Pin, Spidev};
 

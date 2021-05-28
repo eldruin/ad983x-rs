@@ -1,13 +1,11 @@
-extern crate ad983x;
 use ad983x::{
     ControlSource, FrequencyRegister as FreqReg, OutputWaveform as OW, PhaseRegister as PhaseReg,
     PoweredDown as PD, SignBitOutput as SBO,
 };
-extern crate embedded_hal_mock as hal;
-use self::hal::spi::Transaction as SpiTrans;
+use embedded_hal_mock::spi::Transaction as SpiTrans;
 
 mod base;
-use base::{destroy, new_ad9833, new_ad9834, new_ad9837, new_ad9838, BitFlags as BF};
+use crate::base::{destroy, new_ad9833, new_ad9834, new_ad9837, new_ad9838, BitFlags as BF};
 
 #[test]
 fn can_create_and_destroy_ad9833() {

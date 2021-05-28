@@ -1,8 +1,8 @@
-use core::marker::PhantomData;
-use {
+use crate::{
     Ad983x, BitFlags, Config, Error, FrequencyRegister, PhaseRegister, PoweredDown, SpiInterface,
     SpiWrite,
 };
+use core::marker::PhantomData;
 
 impl Config {
     pub(crate) fn with_high(self, mask: u16) -> Self {
@@ -243,8 +243,8 @@ where
 
 impl<SPI, CS, CommE, PinE> SpiWrite for SpiInterface<SPI, CS>
 where
-    SPI: hal::blocking::spi::Write<u8, Error = CommE>,
-    CS: hal::digital::v2::OutputPin<Error = PinE>,
+    SPI: embedded_hal::blocking::spi::Write<u8, Error = CommE>,
+    CS: embedded_hal::digital::v2::OutputPin<Error = PinE>,
 {
     type Error = Error<CommE, PinE>;
     fn write(&mut self, payload: u16) -> Result<(), Self::Error> {

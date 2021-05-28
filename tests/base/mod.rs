@@ -1,5 +1,5 @@
 use ad983x::{marker, Ad983x, SpiInterface};
-use hal::spi::{Mock as SpiMock, Transaction as SpiTrans};
+use embedded_hal_mock::spi::{Mock as SpiMock, Transaction as SpiTrans};
 
 pub struct BitFlags;
 impl BitFlags {

@@ -1,4 +1,4 @@
-use {marker, Ad983x, BitFlags, Error, OutputWaveform, SpiInterface, SpiWrite};
+use crate::{marker, Ad983x, BitFlags, Error, OutputWaveform, SpiInterface, SpiWrite};
 
 impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
     /// Create a new instance of an AD9833 device.
