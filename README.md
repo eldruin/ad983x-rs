@@ -2,6 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/ad983x.svg)](https://crates.io/crates/ad983x)
 [![Docs](https://docs.rs/ad983x/badge.svg)](https://docs.rs/ad983x)
+![Minimum Supported Rust Version](https://img.shields.io/badge/rustc-1.31+-blue.svg)
 [![Build Status](https://github.com/eldruin/ad983x-rs/workflows/Build/badge.svg)](https://github.com/eldruin/ad983x-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ad983x-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ad983x-rs?branch=master)
 
