@@ -270,7 +270,7 @@ pub const MODE: Mode = MODE_2;
 
 /// SPI interface
 #[doc(hidden)]
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct SpiInterface<SPI, CS> {
     pub(crate) spi: SPI,
     pub(crate) cs: CS,
@@ -300,7 +300,7 @@ struct Config {
 }
 
 /// AD983x direct digital synthesizer
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Ad983x<DI, IC> {
     iface: DI,
     control: Config,
