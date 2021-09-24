@@ -177,6 +177,7 @@
 //! // Hardware pins can now be used to control the device.
 //! // The corresponding software settings will be ignored.
 //! ```
+#![doc(html_root_url = "https://docs.rs/ad983x/0.3.0")]
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
