@@ -1,7 +1,6 @@
-use crate::{
-    Ad983x, BitFlags, Config, Error, FrequencyRegister, PhaseRegister, PoweredDown, SpiInterface,
-    SpiWrite,
-};
+use embedded_hal::spi::blocking::{SpiBus, SpiDevice};
+
+use crate::{Ad983x, BitFlags, Config, Error, FrequencyRegister, PhaseRegister, PoweredDown};
 use core::marker::PhantomData;
 
 impl Config {
@@ -35,13 +34,10 @@ impl BitFlags {
     pub(crate) const MODE: u16 = 1 << 1;
 }
 
-impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
-    pub(crate) fn create(spi: SPI, chip_select: CS) -> Self {
+impl<DEV, IC> Ad983x<DEV, IC> {
+    pub(crate) fn create(spi: DEV) -> Self {
         Ad983x {
-            iface: SpiInterface {
-                spi,
-                cs: chip_select,
-            },
+            spi,
             control: Config {
                 bits: BitFlags::RESET,
             },
@@ -50,20 +46,21 @@ impl<SPI, CS, IC> Ad983x<SpiInterface<SPI, CS>, IC> {
     }
 
     /// Destroy driver instance, return SPI bus instance and CS output pin.
-    pub fn destroy(self) -> (SPI, CS) {
-        (self.iface.spi, self.iface.cs)
+    pub fn destroy(self) -> DEV {
+        self.spi
     }
 }
 
-impl<CommE, PinE, DI, IC> Ad983x<DI, IC>
+impl<DEV, IC, E> Ad983x<DEV, IC>
 where
-    DI: SpiWrite<Error = Error<CommE, PinE>>,
+    DEV: SpiDevice<Error = E>,
+    DEV::Bus: SpiBus,
 {
     /// Resets the internal registers and leaves the device disabled.
     ///
     /// Note that this is ignored in AD9834/AD9838 devices if hardware pin
     /// control source is selected.
-    pub fn reset(&mut self) -> Result<(), DI::Error> {
+    pub fn reset(&mut self) -> Result<(), Error<E>> {
         self.disable()
     }
 
@@ -72,7 +69,7 @@ where
     /// This resets the internal registers.
     /// Note that this is ignored in AD9834/AD9838 devices if hardware pin
     /// control source is selected.
-    pub fn disable(&mut self) -> Result<(), DI::Error> {
+    pub fn disable(&mut self) -> Result<(), Error<E>> {
         let control = self.control.with_high(BitFlags::RESET);
         self.write_control(control)
     }
@@ -81,12 +78,12 @@ where
     ///
     /// Note that this is ignored in AD9834/AD9838 devices if hardware pin
     /// control source is selected.
-    pub fn enable(&mut self) -> Result<(), DI::Error> {
+    pub fn enable(&mut self) -> Result<(), Error<E>> {
         let control = self.control.with_low(BitFlags::RESET);
         self.write_control(control)
     }
 
-    fn check_value_fits<T>(value: T, bit_count: T) -> Result<(), DI::Error>
+    fn check_value_fits<T>(value: T, bit_count: T) -> Result<(), Error<E>>
     where
         T: From<u8> + PartialOrd + core::ops::Shl<Output = T>,
     {
@@ -105,7 +102,7 @@ where
         &mut self,
         register: FrequencyRegister,
         value: u32,
-    ) -> Result<(), DI::Error> {
+    ) -> Result<(), Error<E>> {
         Self::check_value_fits(value, 28)?;
         let control = self.control.with_high(BitFlags::B28);
         self.write_control_if_different(control)?;
@@ -131,7 +128,7 @@ where
         &mut self,
         register: FrequencyRegister,
         value: u16,
-    ) -> Result<(), DI::Error> {
+    ) -> Result<(), Error<E>> {
         Self::check_value_fits(value, 14)?;
         let control = self
             .control
@@ -150,7 +147,7 @@ where
         &mut self,
         register: FrequencyRegister,
         value: u16,
-    ) -> Result<(), DI::Error> {
+    ) -> Result<(), Error<E>> {
         Self::check_value_fits(value, 14)?;
         let control = self.control.with_low(BitFlags::B28).with_low(BitFlags::HLB);
         self.write_control_if_different(control)?;
@@ -162,7 +159,7 @@ where
     ///
     /// Note: this can be overriden through the FSELECT pin in AD9834/AD9838
     /// devices if hardware pin control source is selected.
-    pub fn select_frequency(&mut self, register: FrequencyRegister) -> Result<(), DI::Error> {
+    pub fn select_frequency(&mut self, register: FrequencyRegister) -> Result<(), Error<E>> {
         let control = match register {
             FrequencyRegister::F0 => self.control.with_low(BitFlags::FSELECT),
             FrequencyRegister::F1 => self.control.with_high(BitFlags::FSELECT),
@@ -173,7 +170,7 @@ where
     /// Set a phase register (12-bit value)
     ///
     /// Returns `Error::InvalidArgument` if providing a value that does not fit in 12 bits.
-    pub fn set_phase(&mut self, register: PhaseRegister, value: u16) -> Result<(), DI::Error> {
+    pub fn set_phase(&mut self, register: PhaseRegister, value: u16) -> Result<(), Error<E>> {
         Self::check_value_fits(value, 12)?;
         let value = value | BitFlags::D14 | BitFlags::D15;
         let value = match register {
@@ -187,7 +184,7 @@ where
     ///
     /// Note: this can be overriden through the PSELECT pin in AD9834/AD9838
     /// devices if hardware pin control source is selected.
-    pub fn select_phase(&mut self, register: PhaseRegister) -> Result<(), DI::Error> {
+    pub fn select_phase(&mut self, register: PhaseRegister) -> Result<(), Error<E>> {
         let control = match register {
             PhaseRegister::P0 => self.control.with_low(BitFlags::PSELECT),
             PhaseRegister::P1 => self.control.with_high(BitFlags::PSELECT),
@@ -199,7 +196,7 @@ where
     ///
     /// Note: This can be overriden through the SLEEP pin
     /// in AD9834/AD9838 devices if hardware pin control source is selected.
-    pub fn set_powered_down(&mut self, config: PoweredDown) -> Result<(), DI::Error> {
+    pub fn set_powered_down(&mut self, config: PoweredDown) -> Result<(), Error<E>> {
         let control = match config {
             PoweredDown::Nothing => self
                 .control
@@ -221,7 +218,7 @@ where
         self.write_control(control)
     }
 
-    pub(crate) fn write_control_if_different(&mut self, control: Config) -> Result<(), DI::Error> {
+    pub(crate) fn write_control_if_different(&mut self, control: Config) -> Result<(), Error<E>> {
         if control != self.control {
             self.write_control(control)
         } else {
@@ -229,31 +226,16 @@ where
         }
     }
 
-    pub(crate) fn write_control(&mut self, control: Config) -> Result<(), DI::Error> {
+    pub(crate) fn write_control(&mut self, control: Config) -> Result<(), Error<E>> {
         let payload = control.bits & 0b0011_1111_1111_1111;
         self.write(payload)?;
         self.control = control;
         Ok(())
     }
 
-    pub(crate) fn write(&mut self, payload: u16) -> Result<(), DI::Error> {
-        self.iface.write(payload)
-    }
-}
-
-impl<SPI, CS, CommE, PinE> SpiWrite for SpiInterface<SPI, CS>
-where
-    SPI: embedded_hal::blocking::spi::Write<u8, Error = CommE>,
-    CS: embedded_hal::digital::v2::OutputPin<Error = PinE>,
-{
-    type Error = Error<CommE, PinE>;
-    fn write(&mut self, payload: u16) -> Result<(), Self::Error> {
-        self.cs.set_low().map_err(Error::Pin)?;
-        let result = self
-            .spi
+    pub(crate) fn write(&mut self, payload: u16) -> Result<(), Error<E>> {
+        self.spi
             .write(&[(payload >> 8) as u8, payload as u8])
-            .map_err(Error::Spi);
-        self.cs.set_high().map_err(Error::Pin)?;
-        result
+            .map_err(Error::Spi)
     }
 }

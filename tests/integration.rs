@@ -33,7 +33,7 @@ fn can_create_and_destroy_ad9838() {
 
 #[test]
 fn can_enable() {
-    let transitions = [SpiTrans::write(vec![0, 0])];
+    let transitions = [SpiTrans::write_vec(vec![0, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.enable().unwrap();
     destroy(dev);
@@ -41,7 +41,7 @@ fn can_enable() {
 
 #[test]
 fn can_disable() {
-    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.disable().unwrap();
     destroy(dev);
@@ -49,7 +49,7 @@ fn can_disable() {
 
 #[test]
 fn can_reset() {
-    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.reset().unwrap();
     destroy(dev);
@@ -66,9 +66,9 @@ fn cannot_set_too_fast_frequency() {
 #[test]
 fn can_set_freq0() {
     let transitions = [
-        SpiTrans::write(vec![BF::B28 | BF::RESET, 0]),
-        SpiTrans::write(vec![BF::FREQ0 | 0xD, 0xEF]),
-        SpiTrans::write(vec![BF::FREQ0 | 0x26, 0xAF]),
+        SpiTrans::write_vec(vec![BF::B28 | BF::RESET, 0]),
+        SpiTrans::write_vec(vec![BF::FREQ0 | 0xD, 0xEF]),
+        SpiTrans::write_vec(vec![BF::FREQ0 | 0x26, 0xAF]),
     ];
     let mut dev = new_ad9833(&transitions);
     dev.set_frequency(FreqReg::F0, 0x9AB_CDEF).unwrap();
@@ -78,9 +78,9 @@ fn can_set_freq0() {
 #[test]
 fn can_set_freq1() {
     let transitions = [
-        SpiTrans::write(vec![BF::B28 | BF::RESET, 0]),
-        SpiTrans::write(vec![BF::FREQ1 | 0xD, 0xEF]),
-        SpiTrans::write(vec![BF::FREQ1 | 0x26, 0xAF]),
+        SpiTrans::write_vec(vec![BF::B28 | BF::RESET, 0]),
+        SpiTrans::write_vec(vec![BF::FREQ1 | 0xD, 0xEF]),
+        SpiTrans::write_vec(vec![BF::FREQ1 | 0x26, 0xAF]),
     ];
     let mut dev = new_ad9833(&transitions);
     dev.set_frequency(FreqReg::F1, 0x9AB_CDEF).unwrap();
@@ -89,7 +89,7 @@ fn can_set_freq1() {
 
 #[test]
 fn can_select_freq0() {
-    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.select_frequency(FreqReg::F0).unwrap();
     destroy(dev);
@@ -97,7 +97,7 @@ fn can_select_freq0() {
 
 #[test]
 fn can_select_freq1() {
-    let transitions = [SpiTrans::write(vec![BF::FSELECT | BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::FSELECT | BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.select_frequency(FreqReg::F1).unwrap();
     destroy(dev);
@@ -113,7 +113,7 @@ fn cannot_set_wrong_phase() {
 
 #[test]
 fn can_set_phase0() {
-    let transitions = [SpiTrans::write(vec![BF::D15 | BF::D14 | 0xA, 0xBC])];
+    let transitions = [SpiTrans::write_vec(vec![BF::D15 | BF::D14 | 0xA, 0xBC])];
     let mut dev = new_ad9833(&transitions);
     dev.set_phase(PhaseReg::P0, 0xABC).unwrap();
     destroy(dev);
@@ -121,7 +121,7 @@ fn can_set_phase0() {
 
 #[test]
 fn can_set_phase1() {
-    let transitions = [SpiTrans::write(vec![
+    let transitions = [SpiTrans::write_vec(vec![
         BF::D15 | BF::D14 | BF::D13 | 0xA,
         0xBC,
     ])];
@@ -132,7 +132,7 @@ fn can_set_phase1() {
 
 #[test]
 fn can_select_phase0() {
-    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.select_phase(PhaseReg::P0).unwrap();
     destroy(dev);
@@ -140,7 +140,7 @@ fn can_select_phase0() {
 
 #[test]
 fn can_select_phase1() {
-    let transitions = [SpiTrans::write(vec![BF::PSELECT | BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::PSELECT | BF::RESET, 0])];
     let mut dev = new_ad9833(&transitions);
     dev.select_phase(PhaseReg::P1).unwrap();
     destroy(dev);
@@ -150,7 +150,7 @@ macro_rules! ow_test {
     ($name:ident, $create:ident, $ow:ident, $control:expr) => {
         #[test]
         fn $name() {
-            let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
+            let transitions = [SpiTrans::write_vec(vec![BF::RESET, $control])];
             let mut dev = $create(&transitions);
             dev.set_output_waveform(OW::$ow).unwrap();
             destroy(dev);
@@ -179,7 +179,7 @@ macro_rules! pd_test {
     ($name:ident, $pd:ident, $control:expr) => {
         #[test]
         fn $name() {
-            let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
+            let transitions = [SpiTrans::write_vec(vec![BF::RESET, $control])];
             let mut dev = new_ad9833(&transitions);
             dev.set_powered_down(PD::$pd).unwrap();
             destroy(dev);
@@ -215,8 +215,8 @@ fn cannot_set_wrong_freq_lsb() {
 #[test]
 fn can_set_freq_msb() {
     let transitions = [
-        SpiTrans::write(vec![BF::HLB | BF::RESET, 0]),
-        SpiTrans::write(vec![BF::FREQ0 | 0xD, 0xEF]),
+        SpiTrans::write_vec(vec![BF::HLB | BF::RESET, 0]),
+        SpiTrans::write_vec(vec![BF::FREQ0 | 0xD, 0xEF]),
     ];
     let mut dev = new_ad9833(&transitions);
     dev.set_frequency_msb(FreqReg::F0, 0xDEF).unwrap();
@@ -225,7 +225,7 @@ fn can_set_freq_msb() {
 
 #[test]
 fn can_set_freq_lsb() {
-    let transitions = [SpiTrans::write(vec![BF::FREQ1 | 0xD, 0xEF])];
+    let transitions = [SpiTrans::write_vec(vec![BF::FREQ1 | 0xD, 0xEF])];
     let mut dev = new_ad9833(&transitions);
     dev.set_frequency_lsb(FreqReg::F1, 0xDEF).unwrap();
     destroy(dev);
@@ -251,7 +251,7 @@ macro_rules! sbo_test {
     ($name:ident, $sbo:ident, $control:expr) => {
         #[test]
         fn $name() {
-            let transitions = [SpiTrans::write(vec![BF::RESET, $control])];
+            let transitions = [SpiTrans::write_vec(vec![BF::RESET, $control])];
             let mut dev = new_ad9838(&transitions);
             dev.set_sign_bit_output(SBO::$sbo).unwrap();
             destroy(dev);
@@ -278,7 +278,7 @@ sbo_test!(
 
 #[test]
 fn can_set_control_source_sw() {
-    let transitions = [SpiTrans::write(vec![BF::RESET, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::RESET, 0])];
     let mut dev = new_ad9838(&transitions);
     dev.set_control_source(ControlSource::Software).unwrap();
     destroy(dev);
@@ -286,7 +286,7 @@ fn can_set_control_source_sw() {
 
 #[test]
 fn can_set_control_source_hw_pins() {
-    let transitions = [SpiTrans::write(vec![BF::RESET | BF::PIN_SW, 0])];
+    let transitions = [SpiTrans::write_vec(vec![BF::RESET | BF::PIN_SW, 0])];
     let mut dev = new_ad9838(&transitions);
     dev.set_control_source(ControlSource::HardwarePins).unwrap();
     destroy(dev);

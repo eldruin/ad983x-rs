@@ -1,46 +1,39 @@
-use crate::{
-    marker, Ad983x, BitFlags, ControlSource, Error, OutputWaveform, SignBitOutput, SpiInterface,
-    SpiWrite,
-};
+use embedded_hal::spi::blocking::{SpiBus, SpiDevice};
 
-impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9834Ad9838> {
+use crate::{marker, Ad983x, BitFlags, ControlSource, Error, OutputWaveform, SignBitOutput};
+
+impl<DEV, E> Ad983x<DEV, marker::Ad9834Ad9838>
+where
+    DEV: SpiDevice<Error = E>,
+    DEV::Bus: SpiBus,
+{
     /// Create a new instance of an AD9834 device.
     /// Remember to call `reset()` before using the device after power up.
-    pub fn new_ad9834(spi: SPI, chip_select: CS) -> Self {
-        Self::create(spi, chip_select)
+    pub fn new_ad9834(spi: DEV) -> Self {
+        Self::create(spi)
     }
 
     /// Create a new instance of an AD9838 device.
     /// Remember to call `reset()` before using the device after power up.
-    pub fn new_ad9838(spi: SPI, chip_select: CS) -> Self {
-        Self::create(spi, chip_select)
+    pub fn new_ad9838(spi: DEV) -> Self {
+        Self::create(spi)
     }
-}
 
-impl<CommE, PinE, DI> Ad983x<DI, marker::Ad9834Ad9838>
-where
-    DI: SpiWrite<Error = Error<CommE, PinE>>,
-{
     /// Set the output waveform
     ///
     /// Will return `Error::InvalidArgument` for `SquareMsbOfDac` and `SquareMsbOfDacDiv2`
     /// as this is not available on AD9834/AD9838 devices. To set the digital output,
     /// please use
-    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), DI::Error> {
-        let control;
-        match waveform {
-            OutputWaveform::Sinusoidal => {
-                control = self
-                    .control
-                    .with_low(BitFlags::OPBITEN)
-                    .with_low(BitFlags::MODE)
-            }
-            OutputWaveform::Triangle => {
-                control = self
-                    .control
-                    .with_low(BitFlags::OPBITEN)
-                    .with_high(BitFlags::MODE)
-            }
+    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), Error<E>> {
+        let control = match waveform {
+            OutputWaveform::Sinusoidal => self
+                .control
+                .with_low(BitFlags::OPBITEN)
+                .with_low(BitFlags::MODE),
+            OutputWaveform::Triangle => self
+                .control
+                .with_low(BitFlags::OPBITEN)
+                .with_high(BitFlags::MODE),
             OutputWaveform::SquareMsbOfDac => return Err(Error::InvalidArgument),
             OutputWaveform::SquareMsbOfDacDiv2 => return Err(Error::InvalidArgument),
         };
@@ -48,7 +41,7 @@ where
     }
 
     /// Set the digital output
-    pub fn set_sign_bit_output(&mut self, configuration: SignBitOutput) -> Result<(), DI::Error> {
+    pub fn set_sign_bit_output(&mut self, configuration: SignBitOutput) -> Result<(), Error<E>> {
         let control = match configuration {
             SignBitOutput::Disabled => self.control.with_low(BitFlags::OPBITEN),
             SignBitOutput::Comparator => self
@@ -76,7 +69,7 @@ where
     /// Set the control source used for the functions:
     /// frequency register selection, phase register selection,
     /// reset of internal registers, and DAC power-down.
-    pub fn set_control_source(&mut self, source: ControlSource) -> Result<(), DI::Error> {
+    pub fn set_control_source(&mut self, source: ControlSource) -> Result<(), Error<E>> {
         let control = match source {
             ControlSource::Software => self.control.with_low(BitFlags::PIN_SW),
             ControlSource::HardwarePins => self.control.with_high(BitFlags::PIN_SW),

@@ -1,25 +1,28 @@
-use crate::{marker, Ad983x, BitFlags, Error, OutputWaveform, SpiInterface, SpiWrite};
+use embedded_hal::spi::blocking::{SpiBus, SpiDevice};
 
-impl<SPI, CS> Ad983x<SpiInterface<SPI, CS>, marker::Ad9833Ad9837> {
+use crate::{marker, Ad983x, BitFlags, Error, OutputWaveform};
+
+impl<DEV, E> Ad983x<DEV, marker::Ad9833Ad9837>
+where
+    DEV: SpiDevice<Error = E>,
+    DEV::Bus: SpiBus,
+{
     /// Create a new instance of an AD9833 device.
+    ///
     /// Remember to call `reset()` before using the device after power up.
-    pub fn new_ad9833(spi: SPI, chip_select: CS) -> Self {
-        Self::create(spi, chip_select)
+    pub fn new_ad9833(spi: DEV) -> Self {
+        Self::create(spi)
     }
     /// Create a new instance of an AD9837 device.
+    ///
     /// Remember to call `reset()` before using the device after power up.
-    pub fn new_ad9837(spi: SPI, chip_select: CS) -> Self {
+    pub fn new_ad9837(spi: DEV) -> Self {
         // Behaves the same as AD9833
-        Self::create(spi, chip_select)
+        Self::create(spi)
     }
-}
 
-impl<CommE, PinE, DI> Ad983x<DI, marker::Ad9833Ad9837>
-where
-    DI: SpiWrite<Error = Error<CommE, PinE>>,
-{
     /// Set the output waveform
-    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), DI::Error> {
+    pub fn set_output_waveform(&mut self, waveform: OutputWaveform) -> Result<(), Error<E>> {
         let control = match waveform {
             OutputWaveform::Sinusoidal => self
                 .control

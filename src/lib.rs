@@ -55,7 +55,7 @@
 //! Article explaining DDS using an AD9833:
 //! - [All about direct digital synthesis](https://www.analog.com/en/analog-dialogue/articles/all-about-direct-digital-synthesis.html)
 //!
-//! ## Pin / Software control source on AD9834/AD9838
+//! ## SysfsPin / Software control source on AD9834/AD9838
 //!
 //! AD9834/AD9838 devices offer the possibility to control several functions
 //! either through hardware pins or software settings. While hardware pin
@@ -82,11 +82,13 @@
 //!
 //! ```no_run
 //! use ad983x::{Ad983x, FrequencyRegister};
-//! use linux_embedded_hal::{Pin, Spidev};
+//! use embedded_hal::spi::blocking::ExclusiveDevice;
+//! use linux_embedded_hal::{SysfsPin, Spidev};
 //!
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
-//! let chip_select = Pin::new(25);
-//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! let chip_select = SysfsPin::new(25);
+//! let dev = ExclusiveDevice::new(spi, chip_select);
+//! let mut dds = Ad983x::new_ad9833(dev);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_frequency(FrequencyRegister::F0, 4724).unwrap();
 //! dds.enable().unwrap();
@@ -94,8 +96,8 @@
 //! // with a frequency of 440 Hz, which is a standard
 //! // A4 tone.
 //!
-//! // Get SPI device and CS pin back
-//! let (_spi, _chip_select) = dds.destroy();
+//! // Get device back
+//! let _dev = dds.destroy();
 //! ```
 //!
 //! ### Set frequency registers 0 and 1 and alternate between them
@@ -104,11 +106,13 @@
 //!
 //! ```no_run
 //! use ad983x::{Ad983x, FrequencyRegister};
-//! use linux_embedded_hal::{Pin, Spidev};
+//! use embedded_hal::spi::blocking::ExclusiveDevice;
+//! use linux_embedded_hal::{SysfsPin, Spidev};
 //!
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
-//! let chip_select = Pin::new(25);
-//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! let chip_select = SysfsPin::new(25);
+//! let dev = ExclusiveDevice::new(spi, chip_select);
+//! let mut dds = Ad983x::new_ad9833(dev);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! // A4 tone for a 25 MHz clock
 //! dds.set_frequency(FrequencyRegister::F0, 4724).unwrap();
@@ -127,11 +131,13 @@
 //!
 //! ```no_run
 //! use ad983x::{Ad983x, PhaseRegister};
-//! use linux_embedded_hal::{Pin, Spidev};
+//! use embedded_hal::spi::blocking::ExclusiveDevice;
+//! use linux_embedded_hal::{SysfsPin, Spidev};
 //!
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
-//! let chip_select = Pin::new(25);
-//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! let chip_select = SysfsPin::new(25);
+//! let dev = ExclusiveDevice::new(spi, chip_select);
+//! let mut dds = Ad983x::new_ad9833(dev);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_phase(PhaseRegister::P1, 4724).unwrap();
 //! dds.select_phase(PhaseRegister::P1).unwrap();
@@ -141,11 +147,13 @@
 //!
 //! ```no_run
 //! use ad983x::{Ad983x, OutputWaveform};
-//! use linux_embedded_hal::{Pin, Spidev};
+//! use embedded_hal::spi::blocking::ExclusiveDevice;
+//! use linux_embedded_hal::{SysfsPin, Spidev};
 //!
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
-//! let chip_select = Pin::new(25);
-//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! let chip_select = SysfsPin::new(25);
+//! let dev = ExclusiveDevice::new(spi, chip_select);
+//! let mut dds = Ad983x::new_ad9833(dev);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_output_waveform(OutputWaveform::Triangle).unwrap();
 //! ```
@@ -154,11 +162,13 @@
 //!
 //! ```no_run
 //! use ad983x::{Ad983x, PoweredDown};
-//! use linux_embedded_hal::{Pin, Spidev};
+//! use embedded_hal::spi::blocking::ExclusiveDevice;
+//! use linux_embedded_hal::{SysfsPin, Spidev};
 //!
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
-//! let chip_select = Pin::new(25);
-//! let mut dds = Ad983x::new_ad9833(spi, chip_select);
+//! let chip_select = SysfsPin::new(25);
+//! let dev = ExclusiveDevice::new(spi, chip_select);
+//! let mut dds = Ad983x::new_ad9833(dev);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_powered_down(PoweredDown::Dac).unwrap();
 //! ```
@@ -167,17 +177,19 @@
 //!
 //! ```no_run
 //! use ad983x::{Ad983x, ControlSource};
-//! use linux_embedded_hal::{Pin, Spidev};
+//! use embedded_hal::spi::blocking::ExclusiveDevice;
+//! use linux_embedded_hal::{SysfsPin, Spidev};
 //!
 //! let spi = Spidev::open("/dev/spidev0.0").unwrap();
-//! let chip_select = Pin::new(25);
-//! let mut dds = Ad983x::new_ad9838(spi, chip_select);
+//! let chip_select = SysfsPin::new(25);
+//! let dev = ExclusiveDevice::new(spi, chip_select);
+//! let mut dds = Ad983x::new_ad9838(dev);
 //! dds.reset().unwrap(); // reset is necessary before operation
 //! dds.set_control_source(ControlSource::HardwarePins).unwrap();
 //! // Hardware pins can now be used to control the device.
 //! // The corresponding software settings will be ignored.
 //! ```
-#![doc(html_root_url = "https://docs.rs/ad983x/0.3.0")]
+
 #![deny(unsafe_code, missing_docs)]
 #![no_std]
 
@@ -186,11 +198,9 @@ use embedded_hal::spi::{Mode, MODE_2};
 
 /// All possible errors in this crate
 #[derive(Debug)]
-pub enum Error<CommE, PinE> {
+pub enum Error<E> {
     /// SPI communication error
-    Spi(CommE),
-    /// Pin setting error
-    Pin(PinE),
+    Spi(E),
     /// Invalid argument provided
     InvalidArgument,
 }
@@ -269,28 +279,13 @@ pub enum ControlSource {
 /// SPI mode (CPOL = 1, CPHA = 0)
 pub const MODE: Mode = MODE_2;
 
-/// SPI interface
-#[doc(hidden)]
-#[derive(Debug)]
-pub struct SpiInterface<SPI, CS> {
-    pub(crate) spi: SPI,
-    pub(crate) cs: CS,
-}
-
-/// write interface trait
-#[doc(hidden)]
-pub trait SpiWrite: private::Sealed {
-    type Error;
-    fn write(&mut self, payload: u16) -> Result<(), Self::Error>;
-}
-
 /// Markers
 #[doc(hidden)]
 pub mod marker {
     /// AD9833/AD9837 device
-    pub struct Ad9833Ad9837(());
+    pub enum Ad9833Ad9837 {}
     /// AD9834/AD9838 device
-    pub struct Ad9834Ad9838(());
+    pub enum Ad9834Ad9838 {}
 }
 
 struct BitFlags;
@@ -302,8 +297,8 @@ struct Config {
 
 /// AD983x direct digital synthesizer
 #[derive(Debug)]
-pub struct Ad983x<DI, IC> {
-    iface: DI,
+pub struct Ad983x<DEV, IC> {
+    spi: DEV,
     control: Config,
     _ic: PhantomData<IC>,
 }
@@ -313,10 +308,8 @@ mod ad9834_ad9838;
 mod common;
 
 mod private {
-    use super::{marker, SpiInterface};
+    use super::marker;
     pub trait Sealed {}
-
-    impl<SPI, CS> Sealed for SpiInterface<SPI, CS> {}
 
     impl Sealed for marker::Ad9833Ad9837 {}
     impl Sealed for marker::Ad9834Ad9838 {}

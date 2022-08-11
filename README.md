@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/ad983x.svg)](https://crates.io/crates/ad983x)
 [![Docs](https://docs.rs/ad983x/badge.svg)](https://docs.rs/ad983x)
-![Minimum Supported Rust Version](https://img.shields.io/badge/rustc-1.31+-blue.svg)
+![Minimum Supported Rust Version](https://img.shields.io/badge/rustc-1.54+-blue.svg)
 [![Build Status](https://github.com/eldruin/ad983x-rs/workflows/Build/badge.svg)](https://github.com/eldruin/ad983x-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/github/eldruin/ad983x-rs/badge.svg?branch=master)](https://coveralls.io/github/eldruin/ad983x-rs?branch=master)
 
@@ -50,12 +50,14 @@ I wrote an example MIDI player that plays Beethoven's ninth symphony in hardware
 
 ```rust
 use ad983x::{Ad983x, FrequencyRegister};
-use linux_embedded_hal::{Pin, Spidev};
+use embedded_hal::spi::blocking::ExclusiveDevice;
+use linux_embedded_hal::{Spidev, SysfsPin};
 
 fn main() {
     let spi = Spidev::open("/dev/spidev0.0").unwrap();
-    let chip_select = Pin::new(25);
-    let mut dds = Ad983x::new_ad9833(spi, chip_select);
+    let chip_select = SysfsPin::new(25);
+    let dev = ExclusiveDevice::new(spi, chip_select);
+    let mut dds = Ad983x::new_ad9833(dev);
     dds.reset().unwrap(); // reset is necessary before operation
     dds.set_frequency(FrequencyRegister::F0, 4724).unwrap();
     dds.enable().unwrap();
@@ -63,8 +65,8 @@ fn main() {
     // with a frequency of 440 Hz, which is a standard
     // A4 tone.
 
-    // Get SPI device and CS pin back
-    let (_spi, _chip_select) = dds.destroy();
+    // Get device back
+    let _dev = dds.destroy();
 }
 ```
 
